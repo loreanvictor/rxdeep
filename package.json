@@ -1,0 +1,37 @@
+{
+  "name": "rxdeep",
+  "version": "0.0.1",
+  "description": "rxjs deep state management",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node samples",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loreanvictor/rxdeep.git"
+  },
+  "keywords": [
+    "rxjs",
+    "state",
+    "reactive",
+    "store",
+    "redux",
+    "state-management",
+    "nested",
+    "deep"
+  ],
+  "author": "Eugene Ghanizadeh Khoub <ghanizadeh.eugene@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/loreanvictor/rxdeep/issues"
+  },
+  "homepage": "https://github.com/loreanvictor/rxdeep#readme",
+  "devDependencies": {
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "rxjs": "^6.5.5"
+  }
+}
