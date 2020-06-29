@@ -27,7 +27,7 @@ export class State<T> extends BehaviorSubject<T> {
   public get value(): T { return this.getValue(); }
   public set value(val: T) { this.next(val); }
 
-  public sub<K extends keyof T>(key: K, comp: Comparator<T[K] | undefined> = (a, b) => a === b) {
+  public sub<K extends keyof T>(key: K, comp: Comparator<T[K]> = (a, b) => a === b) {
     return new State<T[K]>(
       this.value ? this.value[key] : undefined as any,
       comp,
