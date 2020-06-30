@@ -1,11 +1,8 @@
-import { State } from '../src/state';
+import { State } from '../src';
 
 
-const a = new State({x : 2, y : 3});
-const b = new State({x: 3, z: 4});
-
-a.sub('x').subscribe(b.sub('x'));
-b.sub('x').subscribe(a.sub('x'));
-
-b.subscribe(console.log);
-a.sub('x').value = 5;
+const a = new State([{ name: 'eugene'}, {name: 'jack'}]);
+a.subscribe(console.log);
+a.sub(0).sub('name').subscribe(console.log);
+a.sub(0).subscribe(console.log);
+a.value = a.value.slice(0, 1);

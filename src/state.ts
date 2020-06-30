@@ -1,76 +1,63 @@
-import { BehaviorSubject, Observer, Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, Observer, Subject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+
+import { Change, EqualityCheck } from './types';
 
 
-export type Comparator<T> = (a: T, b: T) => boolean;
+export class State<T> extends Observable<T | undefined> implements Observer<T | undefined> {
+  private _value: T | undefined;
+  readonly downstream: Observable<Change<T>>;
+  readonly upstream: Observer<Change<T>>;
 
-
-export class State<T> extends BehaviorSubject<T> {
-  private subcriptions: Subscription;
-
-  constructor(initial: T,
-    private comparator: Comparator<T> = (a, b) => a === b,
-    downstream?: Observable<T>,
-    private upstream?: Observer<T>,
+  constructor(initial: T | undefined);
+  constructor(initial: T | undefined, downstream: Observable<Change<T>>, upstream: Observer<Change<T>>);
+  constructor(initial: T | undefined,
+    downstream: Observable<Change<T>> = new Subject<Change<T>>(),
+    upstream?: Observer<Change<T>>
   ) {
-    super(initial);
-    if (downstream) {
-      this.subcriptions = downstream.subscribe({
-        next: v => this._receive(v, false),
-        error: err => this.error(err),
-        complete: () => this.complete(),
-      });
-    }
+    super((observer: Observer<T | undefined>) => {
+      observer.next(this._value);
+      return downstream.subscribe(change => {
+          if (change.value !== this._value) this._value = change.value;
+          observer.next(change.value);
+        },
+        err => observer.error(err),
+        () => observer.complete()
+      );
+    });
+
+    this._value = initial;
+    this.downstream = downstream;
+    this.upstream = upstream || this.downstream as any as Observer<Change<T>>;
   }
 
-  public next(t: T) { this._receive(t); }
-  public get value(): T { return this.getValue(); }
-  public set value(val: T) { this.next(val); }
+  next(t: T | undefined) { this.upstream.next({ value: t, trace: [] }); }
+  error(err: any) { this.upstream.error(err); }
+  complete() { this.upstream.complete(); }
 
-  public sub<K extends keyof T>(key: K, comp: Comparator<T[K]> = (a, b) => a === b) {
-    return new State<T[K]>(
-      this.value ? this.value[key] : undefined as any,
-      comp,
-      this.pipe(map(v => v ? v[key] : undefined as any)),
+  get value() { return this._value as any; }
+  set value(t: T) { this.next(t); }
+
+  sub<K extends keyof T>(key: K, isEqual: EqualityCheck<T[K]> = (a, b) => a === b) {
+    const _sub: State<T[K]> = new State<T[K]>(
+      this.value ? this.value[key] : undefined,
+      this.downstream.pipe(
+        map(change => ({ trace: change.trace, value: change.value ? change.value[key] : undefined })),
+        filter(
+          change => change.trace[0] === key
+          || (change.trace.length === 0 && !isEqual(change.value, _sub.value))),
+        map(change => ({ value: change.value, trace: change.trace.slice(1) }))
+      ),
       {
-        next: v => {
-          this.value[key] = v!!;
-          super.next(this.value);
-          this._upPropagate();
+        next: change => {
+          this.value[key] = change.value!!;
+          this.upstream.next({ value: this.value, trace: [key, ...change.trace]});
         },
-        error: err => this.error(err),
+        error: err => this.upstream.error(err),
         complete: () => {},
       }
-    )
-  }
+    );
 
-  public complete() {
-    super.complete();
-    this.upstream?.complete();
-    this.subcriptions?.unsubscribe();
-  }
-
-  public error(err: any) {
-    super.error(err);
-    this.upstream?.error(err);
-    this.subcriptions?.unsubscribe();
-  }
-
-  public unsubscribe() {
-    super.unsubscribe();
-    this.upstream?.complete();
-    this.subcriptions?.unsubscribe();
-  }
-
-  private _receive(t: T, upPropagate = true) {
-    if (!this.comparator(this.getValue(), t)) {
-      super.next(t);
-      if (upPropagate) this._upPropagate();
-    }
-  }
-
-  private _upPropagate() {
-    if (this.upstream && !this.upstream.closed)
-      this.upstream.next(this.value);
+    return _sub;
   }
 }
