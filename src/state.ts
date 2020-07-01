@@ -18,8 +18,8 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
     super((observer: Observer<T | undefined>) => {
       observer.next(this._value);
       return downstream.subscribe(change => {
-          if (change.value !== this._value) this._value = change.value;
-          observer.next(change.value);
+          if (change.value !== this._value) this._value = change.value; // --> maintain updated reference
+          observer.next(change.value);                                  // --> pass value down
         },
         err => observer.error(err),
         () => observer.complete()
@@ -31,7 +31,7 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
     this.upstream = upstream || this.downstream as any as Observer<Change<T>>;
   }
 
-  next(t: T | undefined) { this.upstream.next({ value: t, trace: [] }); }
+  next(t: T | undefined) { this.upstream.next({ value: t }); }
   error(err: any) { this.upstream.error(err); }
   complete() { this.upstream.complete(); }
 
@@ -39,19 +39,35 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
   set value(t: T) { this.next(t); }
 
   sub<K extends keyof T>(key: K, isEqual: EqualityCheck<T[K]> = (a, b) => a === b) {
-    const _sub: State<T[K]> = new State<T[K]>(
-      this.value ? this.value[key] : undefined,
-      this.downstream.pipe(
-        map(change => ({ trace: change.trace, value: change.value ? change.value[key] : undefined })),
+    const _sub: State<T[K]> = new State(
+      this.value ? this.value[key] : undefined,                   // --> initial value
+      this.downstream.pipe(                                       // --> for changes reported from above
+        map(change => ({
+          trace: change.trace,
+          value: change.value ? change.value[key] : undefined     // --> extract change's value for equality check
+        })),
         filter(
-          change => change.trace[0] === key
-          || (change.trace.length === 0 && !isEqual(change.value, _sub.value))),
-        map(change => ({ value: change.value, trace: change.trace.slice(1) }))
+          change => change.trace?.head?.sub === key               // --> check if change's address matches sub key
+          || (
+            !change.trace?.head                                   // --> or change is not targeted any more
+            && !isEqual(change.value, _sub.value)                 // --> and equality check fails
+          )
+        ),
+        map(change => ({ 
+          value: change.value,
+          trace: change.trace?.rest                                // --> pass down rest of the trace
+        }))
       ),
       {
-        next: change => {
-          this.value[key] = change.value!!;
-          this.upstream.next({ value: this.value, trace: [key, ...change.trace]});
+        next: change => {                                          // --> for changes coming from the sub
+          this.value[key] = change.value!!;                        // --> update latest value
+          this.upstream.next({
+            value: this.value,
+            trace: {
+              head: { sub: key },                                   // --> add sub key as trace head
+              rest: change.trace
+            }
+          });
         },
         error: err => this.upstream.error(err),
         complete: () => {},

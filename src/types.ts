@@ -1,27 +1,43 @@
 export type EqualityCheck<T> = (a: T | undefined, b: T | undefined) => boolean;
 
+
+export interface ChangeTraceElement<T> {
+  sub: keyof T;
+  keys?: {
+    [key: string]: number | string;
+  }
+}
+
+
+export interface ChangeTrace<T> {
+  head: ChangeTraceElement<T>;
+  rest?: ChangeTrace<any>;
+}
+
+
 export interface Change<T> {
   value: T | undefined;
-  trace: any[];
+  trace?: ChangeTrace<T>;
 }
+
 
 export type KeyFunc<T> = (t: T) => number | string;
 
-export type KeyMap<T> = {[key: string]: { index: string, item: T }};
+export type KeyMap<T> = {[key: string]: { index: number; item: T }};
 
 export type Addition<T> = {
-  index: string;
+  index: number;
   item: T;
 };
 
 export type Deletion<T> = {
-  index: string;
+  index: number;
   item: T;
 };
 
 export type Move<T> = {
-  oldIndex: string;
-  newIndex: string;
+  oldIndex: number;
+  newIndex: number;
   item: T;
 };
 

@@ -1,22 +1,23 @@
 import { KeyFunc, KeyMap, ListChanges } from './types';
 
 
-export class KeyWatcher<T> {
+export class Watcher<T> {
   private _keymap: KeyMap<T>;
+  private _last: T[];
 
-  constructor(initial: T[], readonly keyFunc: KeyFunc<T>) {
+  constructor(initial: T[] | undefined, readonly keyFunc: KeyFunc<T>) {
     this._keymap = {};
     this.changes(initial);
   }
 
-  changes(list: T[]) {
+  changes(list: T[] = []) {
     const changes: ListChanges<T> = {
       additions: [],
       deletions: [],
       moves: [],
     };
 
-    const keymap = Object.entries(list).reduce((map, [index, item]) => {
+    const keymap = list.reduce((map, item, index) => {
       const _key = this.keyFunc(item);
       map[_key] = { index, item };
       if (!(_key in this._keymap))
@@ -38,9 +39,11 @@ export class KeyWatcher<T> {
     });
 
     this._keymap = keymap;
+    this._last = list;
 
     return changes;
   }
 
   public get keymap() { return this._keymap; }
+  public get last() { return this._last; }
 }
