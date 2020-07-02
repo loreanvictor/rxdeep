@@ -30,7 +30,10 @@ export class Keyed<T>
     );
   }
 
-  next(t: T[] | undefined) { this.state.upstream.next({ value: t }); }
+  next(t: T[] | undefined) {
+    this.state.upstream.next({ value: t });
+  }
+
   error(err: any) { this.state.upstream.error(err); }
   complete() { this.state.upstream.complete(); }
 

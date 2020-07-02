@@ -1,5 +1,5 @@
 import { Observable, Observer, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, startWith, tap } from 'rxjs/operators';
 
 import { Change, EqualityCheck } from './types';
 
@@ -15,20 +15,16 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
     downstream: Observable<Change<T>> = new Subject<Change<T>>(),
     upstream?: Observer<Change<T>>
   ) {
-    super((observer: Observer<T | undefined>) => {
-      observer.next(this._value);
-      return downstream.subscribe(change => {
-          if (change.value !== this._value) this._value = change.value; // --> maintain updated reference
-          observer.next(change.value);                                  // --> pass value down
-        },
-        err => observer.error(err),
-        () => observer.complete()
-      );
-    });
+    super((observer: Observer<T | undefined>) => this.downstream.pipe(map(change => change.value)).subscribe(observer));
 
     this._value = initial;
-    this.downstream = downstream;
-    this.upstream = upstream || this.downstream as any as Observer<Change<T>>;
+    this.downstream = downstream.pipe(
+      startWith({ value: initial }),
+      tap(change => {
+        if (change.value !== this._value) this._value = change.value;
+      })
+    );
+    this.upstream = upstream || downstream as any as Observer<Change<T>>;
   }
 
   next(t: T | undefined) { this.upstream.next({ value: t }); }
