@@ -1,12 +1,25 @@
 {
   "name": "rxdeep",
-  "version": "0.0.1",
-  "description": "rxjs deep state management",
-  "main": "index.js",
+  "version": "0.0.3",
+  "description": "RxJS deep state management",
+  "main": "dist/es5/index.js",
+  "module": "dist/es6/index.js",
+  "types": "dist/es6/index.d.ts",
   "scripts": {
     "start": "ts-node samples",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ts-node --project conf/typescript/test.json test.ts",
+    "build": "tsc -p conf/typescript/es5.json && tsc -p conf/typescript/es6.json",
+    "pack": "rollup -c conf/rollup/es6.js && rollup -c conf/rollup/es5.js",
+    "cov:view": "nyc npm run test && npm run cov:clean",
+    "cov:travis": "nyc npm run test && npx codecov",
+    "cov:clean": "rm -fr ./.nyc_output && rm -fr ./coverage"
   },
+  "sideEffects": false,
+  "files": [
+    "dist/es6",
+    "dist/es5",
+    "dist/bundles"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/loreanvictor/rxdeep.git"
@@ -28,10 +41,31 @@
   },
   "homepage": "https://github.com/loreanvictor/rxdeep#readme",
   "devDependencies": {
+    "@babel/core": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.14",
+    "chai": "^4.2.0",
+    "mocha": "^8.0.1",
+    "nyc": "^15.1.0",
+    "rollup": "^2.18.2",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-terser": "^6.1.0",
+    "rollup-plugin-uglify": "^6.0.4",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.5"
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.6"
   },
   "dependencies": {
     "rxjs": "^6.5.5"
+  },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "include": ["src/**/*.ts"],
+    "exclude": ["src/**/test/*"],
+    "reporter": ["text", "lcov"]
   }
 }

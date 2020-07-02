@@ -81,4 +81,8 @@ export class Keyed<T>
   index(key: number | string) {
     return this._changes.pipe(map(() => this._watcher.keymap[key].index));
   }
+
+  changes() {
+    return this._changes.pipe(map(([_, listChanges]) => listChanges));
+  }
 }
