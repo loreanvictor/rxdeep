@@ -11,11 +11,11 @@
 
 - **Fast**: Minimum computation, memory allocation, subscriptions, etc.
 - **Precise**<sup>*</sup>: Changes tracked automatically across object-tree and emitted only on affected nodes.
-- **Flexible**: Make changes anywhere on the object tree. Have multiple object trees. Your state, your way.
+- **Flexible**: Make changes anywhere on the object tree. Have multiple object trees. etc.
 - **Change History**: State is tracked through `Change` objects, so you can record changes, replay them, etc.
-- **Interoprable**: Each node of the object-tree (called a `State`) is simply an [`Observable`](https://rxjs.dev/guide/observable) and an [`Observer`](https://rxjs.dev/guide/observer) at the same time, so full interop with anything working with observables and observers.
+- **Interoprable**: Object-tree nodes (i.e. `State`s) are [`Observable`s](https://rxjs.dev/guide/observable) and [`Observer`s](https://rxjs.dev/guide/observer) at the same time, so full interop with anything working with observables and observers.
 - **Extensible**: Each `State` is connected to the rest of the object-tree by a downstream (`Observable<Change>`) and an upstream (`Observer<Change>`). Provide your own upstream/downstream, tap into them to monitor state changes, create state trees distributed across websockets, etc.
-- **Super-Thin**: Extremely thin API surface, extremely small code (and bundle) (min gzipped ~1KB, ~6.5KB with RxJS).
+- **Thin**: Minimal API surface, small code (and bundle) (min gzipped ~1KB, ~6.5KB with RxJS).
 - **Type-Safe**: `State`s have strong type inference and type-safety.
 
 
