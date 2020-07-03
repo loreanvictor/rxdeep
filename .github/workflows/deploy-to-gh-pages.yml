@@ -20,7 +20,8 @@ jobs:
           (PATH=$(npm bin):$PATH && codedoc build)
           # copy assets
           cp favicon.ico dist/
-          cp -r docs/assets/ dist/docs/assets/
+          mkdir dist/docs
+          cp -r docs/assets dist/docs/assets
           # mark no jekyll
           touch dist/.nojekyll
         env:
