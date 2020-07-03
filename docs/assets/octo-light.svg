@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="478px" height="478px" viewBox="0 0 478 478" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Oval</title>
+    <defs>
+        <radialGradient cx="50%" cy="50.2573374%" fx="50%" fy="50.2573374%" r="49.7426626%" id="radialGradient-1">
+            <stop stop-color="#FFFFFF" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="misc" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.2">
+        <g id="rxdeep-banner-dark" transform="translate(-842.000000, -296.000000)" fill="url(#radialGradient-1)">
+            <circle id="Oval" cx="1081" cy="534" r="240"></circle>
+        </g>
+    </g>
+</svg>

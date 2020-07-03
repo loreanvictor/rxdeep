@@ -1,0 +1,101 @@
+{
+  "init": [
+    {
+      "name": "initJssCs",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/transport/setup-jss.js",
+      "hash": "rM0JbKK/SSXOHWIpiS6xjA=="
+    },
+    {
+      "name": "installTheme",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/content/theme.ts",
+      "hash": "asw8jZhuR6sfv3WVEZXyjw=="
+    },
+    {
+      "name": "codeSelection",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/selection.js",
+      "hash": "ZWc6OvOPCStsD3s/u3k0UQ=="
+    },
+    {
+      "name": "sameLineLengthInCodes",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/same-line-length.js",
+      "hash": "MNyxxBwo3yAwD96uz1X/Gw=="
+    },
+    {
+      "name": "initHintBox",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/line-hint/index.js",
+      "hash": "g7k4QBDqtj5/8Ibrpjnf7Q=="
+    },
+    {
+      "name": "initCodeLineRef",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/line-ref/index.js",
+      "hash": "gnTObVJXlfOKa5PJbnQJKQ=="
+    },
+    {
+      "name": "initSmartCopy",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/smart-copy.js",
+      "hash": "ufHnmoJhMqehYmq+Uz4u3Q=="
+    },
+    {
+      "name": "copyHeadings",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/heading/copy-headings.js",
+      "hash": "EEoT7mzfYDwUMJpsDJ72/w=="
+    },
+    {
+      "name": "contentNavHighlight",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/contentnav/highlight.js",
+      "hash": "RbzjqgOsWnYkEdKBiAa3PQ=="
+    },
+    {
+      "name": "loadDeferredIFrames",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/transport/deferred-iframe.js",
+      "hash": "e5lmzy6REXvWxICROFPljA=="
+    },
+    {
+      "name": "smoothLoading",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/transport/smooth-loading.js",
+      "hash": "j0pgFMMvIrIEA2O7GZf0aw=="
+    },
+    {
+      "name": "tocHighlight",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/toc-highlight.js",
+      "hash": "yvT24J6/+dc29C5JsItlMg=="
+    },
+    {
+      "name": "postNavSearch",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/search/post-nav/index.js",
+      "hash": "2/YwWhb6mI0CYQECJBG9yg=="
+    }
+  ],
+  "components": [
+    {
+      "name": "ToCPrevNext",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/prevnext/index.js",
+      "hash": "on39hrrRnUwAC+CSQe6fMA=="
+    },
+    {
+      "name": "GithubSearch",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/misc/github/search.js",
+      "hash": "WaGRbtxydYBhk8W3a+fIRw=="
+    },
+    {
+      "name": "ToCToggle",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/toggle/index.js",
+      "hash": "r1PwKidiV7s50SM873kRXg=="
+    },
+    {
+      "name": "DarkModeSwitch",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/darkmode/index.js",
+      "hash": "6ISjJvGv3e0ehcyTolZr2A=="
+    },
+    {
+      "name": "ConfigTransport",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/transport/config.js",
+      "hash": "ruwufPi2qODVG/lcBwSMsg=="
+    }
+  ],
+  "renderer": {
+    "name": "getRenderer",
+    "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/transport/renderer.js",
+    "hash": "OY9CaBnhEEruY/j5/Y0pWA=="
+  }
+}
