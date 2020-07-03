@@ -139,11 +139,11 @@
   }
   50% {
     opacity: 1;
-    transform: translateY(-100vh) scale(1);
+    transform: translateY(-125vh) scale(1);
   }
   100% {
     opacity: 1;
-    transform: translateY(-100vh) scale(1);
+    transform: translateY(-125vh) scale(1);
   }
 }
   .code-0-0-11 {

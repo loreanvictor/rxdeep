@@ -11,6 +11,11 @@
       "hash": "asw8jZhuR6sfv3WVEZXyjw=="
     },
     {
+      "name": "zoomOnFormula",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/formula/zoom-on-formula.js",
+      "hash": "U6SV3nTEFb0ZA0YKJThEFw=="
+    },
+    {
       "name": "codeSelection",
       "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/selection.js",
       "hash": "ZWc6OvOPCStsD3s/u3k0UQ=="
