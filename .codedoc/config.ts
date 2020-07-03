@@ -3,6 +3,7 @@ import { configuration, DefaultMarkdownCustomComponents } from '@codedoc/core';
 
 import { theme } from './theme';
 import { Banner } from './components/banner';
+import { formulaPlugin } from '@codedoc/core/components';
 
 export const config = /*#__PURE__*/configuration({
   theme,
@@ -26,6 +27,7 @@ export const config = /*#__PURE__*/configuration({
       }
     }
   },
+  plugins: [ formulaPlugin, ],
   markdown: {
     customComponents: {
       ...DefaultMarkdownCustomComponents,

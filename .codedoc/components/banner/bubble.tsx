@@ -33,8 +33,8 @@ const BubbleStyle = themedStyle<CodedocTheme>(theme => ({
   '@keyframes bubble-motion': {
     '0%': { transform: 'translateY(0) scale(.5)', opacity: 0 },
     '10%': { opacity: 1, },
-    '50%': { transform: 'translateY(-100vh) scale(1)', opacity: 1 },
-    '100%': { transform: 'translateY(-100vh) scale(1)', opacity: 1 },
+    '50%': { transform: 'translateY(-125vh) scale(1)', opacity: 1 },
+    '100%': { transform: 'translateY(-125vh) scale(1)', opacity: 1 },
   },
 }));
 

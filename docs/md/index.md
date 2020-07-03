@@ -92,4 +92,107 @@ Track index of a specific `key`:
 keyed.index(101).subscribe(console.log);      // --> logs 0, 1
 ```
 
+---
+
+# Features
+
+Here are the design goals/features of **RxDeep**, setting aside from other reactive state management libraries:
+
+<br>
+
+## Performance
+
+**RxDeep** is extremely fast and light-weight in terms of memory consumption and computation. Each state-tree
+is represented by one [`Subject`](https://rxjs.dev/guide/subject), rest of tree simply modeled with _pure_ observables
+(built on fast pure _mappings_ of this core subject).
+
+The only performance hotspot are `Keyed` states, as they conduct an [O(n)](:Formula) operation on change emission
+from state-tree upstream, involving a user-provided _key_ function. To mitigate potential performance hits, `Keyed` states
+do share this computation across subscriptions.
+
+<br>
+
+## Precision
+
+**RxDeep** enables subscribing to a particular sub-state of the state tree. These sub-states (mostly) only
+emit values when the value of the sub-state has changed (or a changes issued on same tree address). 
+So you could subscribe heavy-weight operations (such as DOM re-rendering)
+on sub-states.
+
+Sometimes **RxDeep** is unable to determine the address of a change and needs
+to rely on equality checks to be able to properly down-propagate changes.
+Equality operator `===` is used by defaul, which might result in redundant emissions on complex objects.
+If you need absolute precision,
+you can provide custom equality checks (e.g. [`lodash.isEqual()`](https://lodash.com/docs/4.17.15#isEqual)), trading
+performance for precision.
+
+<br>
+
+## Flexibility
+
+Unlike [Redux](https://redux.js.org/) or similar state management libraries, **RxDeep** doesn't require
+you to propagate changes up to the state, or maintain a singular store, etc. A `State` is basically an enhanced
+[`Subject`](https://rxjs.dev/guide/subject) so you could use it as flexibly.
+
+The only limitation (similar to [Redux](https://redux.js.org/)) is that you need to make changes immutable.
+Since you can make changes on leaf-nodes of the state tree (which are always raw objects such as `string`s),
+in really rare cases that limitation should complicate your code.
+
+```ts
+state.value.push(x);                // --> WRONG!
+state.value = state.value.concat(x);// --> CORRECT!
+```
+
+<br>
+
+## Change History
+
+State tree is kept in sync by tracking changes (via `Change` objects). This simply means you can track changes
+directly, record them, replay them, etc.
+
+```ts
+state.downstream.subscribe(console.log);    // --> Log changes
+state.sub(1).sub('name').value = 'Dude';
+
+// This object will be logged:
+{ 
+  value: [{...}, { name: 'Dude', ... }, ...],
+  trace: {
+    head: { sub: 1 },
+    rest: { head: { sub: 'name' } }
+  } 
+}
+```
+
+Furthermore, `Keyed` states provide detailed array changes, i.e. additions/deletions on particular indexes,
+or items being moved from one index to another.
+
+<br>
+
+## Extensibility
+
+Each `State` is an [`Observable`](https://rxjs.dev/guide/observable) 
+and an [`Observer`](https://rxjs.dev/guide/observer) at the same time, 
+providing great inter-operability with [RxJS](https://rxjs.dev), its strong operators, and any
+tool working with observables.
+
+Additionally, each `State` is tied to the rest of the state tree via a downstream (`Observable<Change>`),
+from which the state receives changes from higher-up in the tree,
+and an upstream (`Observer<Change>`), to which the state reports changes occuring to it. The upstream
+and the downstream can be ANY observable/observer pair. This, for example, means you can easily create
+state trees distributed across a network, states trees remaining in sync with some REST API, etc.
+
+<br>
+
+## Thin and Type Safe
+
+**RxDeep** includes minimal surface area (effectively `State` and `Keyed` objects), focusing only on
+effectively tracking and propagating changes across a reactive state tree. Its bundle size is roughly `1KB`,
+not including dependencies. Including dependencies (which is [RxJS](https://rxjs.dev), and hence most probably
+already included in your bundle), it would be `~6.5KB`.
+
+**RxDeep** is written in [TypeScript](https://www.typescriptlang.org/) with detailed type annotations, 
+which should greatly improve development experience even if you use it in JavaScript (error highlighting, autocompletes, etc).
+
+
 > :ToCPrevNext
