@@ -7,7 +7,9 @@
 [![Code Quality](https://badgen.net/codacy/grade/423972f1e78b453e8e69581ba4abc058?cache=300&icon=codacy)](https://www.codacy.com/manual/loreanvictor/rxdeep)
 [![License](https://badgen.net/github/license/loreanvictor/rxdeep?icon=github)](LICENSE)
 
-**RxDeep** provides fast and (mostly) precise reactive state management, in a flexible and unopinionated manner. It uses [RxJS](https://rxjs.dev) to precisely track changes across an object tree. This means you can freely issue changes anywhere on the tree and listen precisely for changes in a particular part of the tree.
+**RxDeep** provides fast and (mostly) precise reactive state management, in a flexible and unopinionated manner.
+
+<br>
 
 - **Fast**: Minimum computation, memory allocation, subscriptions, etc.
 - **Precise**<sup>*</sup>: Changes tracked automatically across object-tree and emitted only on affected nodes.
@@ -17,9 +19,6 @@
 - **Extensible**: Each `State` is connected to the rest of the object-tree by a downstream (`Observable<Change>`) and an upstream (`Observer<Change>`). Provide your own upstream/downstream, tap into them to monitor state changes, create state trees distributed across websockets, etc.
 - **Thin**: Minimal API surface, small code (and bundle) (min gzipped ~1KB, ~6.5KB with RxJS).
 - **Type-Safe**: `State`s have strong type inference and type-safety.
-
-
-> (*) **RxDeep** is _mostly precise_ because you might sometimes get some redundant change notifications. Avoiding this would mean deep comparison conducted on the object tree which has serious performance costs. Most of the time the precision provided by **RxDeep** by default should be more than enough. However it supports providing custom equality checks for change propagation such as [`lodash.isEqual()`](https://lodash.com/docs/2.4.2#isEqual), for situations where you would want to trade some performance for absolute precision.
 
 <br>
 
