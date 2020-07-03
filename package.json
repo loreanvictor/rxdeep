@@ -1,6 +1,6 @@
 {
   "name": "rxdeep",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "RxJS deep state management",
   "main": "dist/es5/index.js",
   "module": "dist/es6/index.js",
@@ -39,7 +39,7 @@
   "bugs": {
     "url": "https://github.com/loreanvictor/rxdeep/issues"
   },
-  "homepage": "https://github.com/loreanvictor/rxdeep#readme",
+  "homepage": "https://loreanvictor.github.io/rxdeep/",
   "devDependencies": {
     "@babel/core": "^7.10.4",
     "@babel/preset-env": "^7.10.4",
