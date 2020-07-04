@@ -258,7 +258,7 @@ state trees distributed across a network, states trees remaining in sync with so
 **RxDeep** includes minimal surface area, focusing only on
 effectively tracking and propagating changes across a reactive state tree. Its bundle size is roughly `~1.5KB`,
 not including dependencies. Including dependencies (which is [RxJS](https://rxjs.dev), and hence most probably
-already included in your bundle), it would be `~6.5KB`.
+already included in your bundle), it would be `~7.5KB`.
 
 **RxDeep** is written in [TypeScript](https://www.typescriptlang.org/) with detailed type annotations, 
 which should greatly improve development experience even if you use it in JavaScript (error highlighting, autocompletes, etc).
