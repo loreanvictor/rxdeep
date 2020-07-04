@@ -167,6 +167,32 @@ state.sub(1).sub('name').value = 'Dude';
 Furthermore, `Keyed` states provide detailed array changes, i.e. additions/deletions on particular indexes,
 or items being moved from one index to another.
 
+```ts
+const state = new State([{ id: 101, name: 'Jack' }, { id: 102, name: 'Jill' }]);
+const keyed = new Keyed(state, p => p.id);
+
+keyed.changes().subscribe(console.log);        // --> Log changes
+
+state.value = [
+  { id: 102, name: 'Jill' },
+  { id: 101, name: 'Jack' },
+  { id: 103, name: 'Jafet' }
+];
+
+// This object will be logged:
+{
+  additions: [{
+    index: 2,
+    item: { id: 103, name: 'Jafet' }
+  }],
+  deletions:[],
+  moves:[
+    { oldIndex: 0, newIndex:1, item: { id: 101, name: 'Jack'} },
+    { oldIndex: 1, newIndex:0, item: { id: 102, name: 'Jill'} }
+  ]
+}
+```
+
 <br>
 
 ## Extensibility
