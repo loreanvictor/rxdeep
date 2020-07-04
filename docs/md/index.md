@@ -131,16 +131,28 @@ performance for precision.
 ## Flexibility
 
 Unlike [Redux](https://redux.js.org/) or similar state management libraries, **RxDeep** doesn't require
-you to propagate changes up to the state, or maintain a singular store, etc. A `State` is basically an enhanced
+you to issue changes at the root of the state-tree, maintain a singular store, etc. A `State` is basically an enhanced
 [`Subject`](https://rxjs.dev/guide/subject) so you could use it as flexibly.
 
-The only limitation (similar to [Redux](https://redux.js.org/)) is that you need to make changes immutable.
+The only limitation (similar to [Redux](https://redux.js.org/)) is that you need to issue changes while
+respecting object immutability (e.g. change array reference when you change content of array).
 Since you can make changes on leaf-nodes of the state tree (which are always raw objects such as `string`s),
-in really rare cases that limitation should complicate your code.
+and in cases when you need to issue changes higher up the state tree you can utilize likes of the spread operator `...`
+for respecting object immutability, in rare cases this limitation should further complicate your code.
+
+**DON'T**:
 
 ```ts
-state.value.push(x);                // --> WRONG!
-state.value = state.value.concat(x);// --> CORRECT!
+state.value.push(x);                   // --> WRONG!
+state.value.x = y;                     // --> WRONG!
+```
+
+
+**DO**:
+```ts
+state.value = state.value.concat(x);   // --> CORRECT!
+state.sub('x').value = y;              // --> CORRECT!
+state.value = { ...state.value, x: y } // --> CORRECT!
 ```
 
 <br>
