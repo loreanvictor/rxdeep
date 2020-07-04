@@ -1,4 +1,4 @@
-import { KeyFunc, KeyMap, ListChanges } from './types';
+import { KeyFunc, KeyMap, ListChanges } from '../types';
 
 
 export class Watcher<T> {

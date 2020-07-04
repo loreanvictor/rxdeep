@@ -3,10 +3,10 @@ import { share, map, filter } from 'rxjs/operators';
 
 import { State } from './state';
 import { KeyFunc, ListChanges, Change, EqualityCheck } from './types';
-import { Watcher } from './watcher';
+import { Watcher } from './util/watcher';
 
 
-export class Keyed<T>
+export class KeyedState<T>
   extends Observable<T[] | undefined>
   implements Observer<T[] | undefined> {
   private _changes: Observable<[Change<T[]>, ListChanges<T>]>;
@@ -31,11 +31,11 @@ export class Keyed<T>
   }
 
   next(t: T[] | undefined) {
-    this.state.upstream.next({ value: t });
+    this.state.upstream.next({ value: t, from: this.value, to: t });
   }
 
   error(err: any) { this.state.upstream.error(err); }
-  complete() { this.state.upstream.complete(); }
+  complete() { this.state.upstream.complete(); } // FIXME: this completes the original state!
 
   get value() { return this._watcher.last; }
   set value(t: T[]) { this.next(t); }
@@ -43,39 +43,52 @@ export class Keyed<T>
   key(key: number | string, isEqual: EqualityCheck<T> = (a, b) => a === b) {
     const sub: State<T> = new State(
       this._watcher.keymap[key]?.item,
-      this._changes.pipe(
-        map(([change, _]) => ({ trace: change.trace, entry: this._watcher.keymap[key] })),
-        filter(change =>
-          change.trace?.head?.keys?.[this._traceKey] === key
-          || change.trace?.head?.sub === change.entry.index
-          || (
-            !change.trace?.head
-            && !isEqual(change.entry.item, sub.value)
-          )
-        ),
-        map(change => ({
-          value: change.entry.item,
-          trace: change.trace?.rest
-        }))
-      ),
-      {
-        next: change => {
-          const entry = this._watcher.keymap[key];
-          this._watcher.last[entry.index] = change.value!!;
-          this.state.upstream.next({
-            value: this._watcher.last,
-            trace: {
-              head: { sub: entry.index, keys: { [this._traceKey]: key }},
-              rest: change.trace,
-            }
-          });
-        },
-        error: err => this.state.upstream.error(err),
-        complete: () => {},
-      }
+      this.keyDownstream(key, v => !isEqual(v, sub.value)),
+      this.keyUpstream(key),
     );
 
     return sub;
+  }
+
+  keyDownstream(key: number | string, hasChanged: (t: T) => boolean) {
+    return this._changes.pipe(
+      map(([change, _]) => ({ 
+        trace: change.trace, from: change.from, to: change.to,
+        entry: this._watcher.keymap[key],
+      })),
+      filter(change =>
+        change.trace?.head?.keys?.[this._traceKey] === key
+        || change.trace?.head?.sub === change.entry.index
+        || (
+          !change.trace?.head
+          && hasChanged(change.entry.item)
+        )
+      ),
+      map(change => ({
+        value: change.entry.item,
+        from: change.from, to: change.to,
+        trace: change.trace?.rest
+      }))
+    );
+  }
+
+  keyUpstream(key: number | string): Observer<Change<T>> {
+    return {
+      next: change => {
+        const entry = this._watcher.keymap[key];
+        this._watcher.last[entry.index] = change.value!!;
+        this.state.upstream.next({
+          value: this._watcher.last,
+          from: change.from, to: change.to,
+          trace: {
+            head: { sub: entry.index, keys: { [this._traceKey]: key }},
+            rest: change.trace,
+          }
+        });
+      },
+      error: err => this.state.upstream.error(err),
+      complete: () => {},
+    }
   }
 
   index(key: number | string) {

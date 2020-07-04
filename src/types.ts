@@ -6,17 +6,21 @@ export interface ChangeTraceElement<T> {
   keys?: {
     [key: string]: number | string;
   }
-}
+};
 
+
+export type ChangeTraceRest<T> = T extends any[] ? ChangeTrace<T[number]>: ChangeTrace<T[keyof T]>;
 
 export interface ChangeTrace<T> {
   head: ChangeTraceElement<T>;
-  rest?: ChangeTrace<any>;
+  rest?: ChangeTraceRest<T>;
 }
 
 
 export interface Change<T> {
   value: T | undefined;
+  from: any;
+  to: any;
   trace?: ChangeTrace<T>;
 }
 

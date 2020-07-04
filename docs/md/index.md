@@ -73,10 +73,10 @@ state.sub(1).pipe(debounceTime(1000)).subscribe(console.log); // --> debounces c
 Track `keys` instead of indexes:
 
 ```ts
-import { State, Keyed } from 'rxdeep';
+import { State, KeyedState } from 'rxdeep';
 
 const state = new State([{ id: 101, name: 'Jill' }, { id: 102, name: 'Jack' }]);
-const keyed = new Keyed(state, p => p.id);
+const keyed = new KeyedState(state, p => p.id);
 
 keyed.key(101).sub('name').subscribe(console.log);     // --> logs `Jill`
 
@@ -92,6 +92,25 @@ Track index of a specific `key`:
 keyed.index(101).subscribe(console.log);      // --> logs 0, 1
 ```
 
+<br>
+
+Verify changes to the state:
+
+```ts
+import { State, VerifiedState } from 'rxdeep';
+
+const s = new State(12);
+const v = new VerifiedState(s, change => change.from < change.to); // --> only increasing numbers
+
+v.subscribe(console.log);
+
+v.value = 10; // --> logs 12
+v.value = 14; // --> logs 14
+v.value = 9;  // --> logs 14
+v.value = 13; // --> logs 14
+v.value = 15; // --> logs 15
+```
+
 ---
 
 # Features
@@ -102,11 +121,10 @@ Here are the design goals/features of **RxDeep**, setting aside from other react
 
 ## Performance
 
-**RxDeep** is extremely fast and light-weight in terms of memory consumption and computation. Each state-tree
-is represented by one [`Subject`](https://rxjs.dev/guide/subject), rest of tree simply modeled with _pure_ observables
-(built on fast pure _mappings_ of this core subject).
+**RxDeep** is extremely fast and light-weight in terms of memory consumption and computation, utilizing pure mappings
+on the root of the state-tree for reading/writing on the whole tree.
 
-The only performance hotspot are `Keyed` states, as they conduct an [O(n)](:Formula) operation on change emission
+The only performance hotspot are `KeyedState`s, as they conduct an [O(n)](:Formula) operation on change emission
 from state-tree upstream, involving a user-provided _key_ function. To mitigate potential performance hits, `Keyed` states
 do share this computation across subscriptions.
 
@@ -115,7 +133,7 @@ do share this computation across subscriptions.
 ## Precision
 
 **RxDeep** enables subscribing to a particular sub-state of the state tree. These sub-states (mostly) only
-emit values when the value of the sub-state has changed (or a changes issued on same tree address). 
+emit values when the value of the sub-state has changed (or a change is issued on same tree address).
 So you could subscribe heavy-weight operations (such as DOM re-rendering)
 on sub-states.
 
@@ -130,15 +148,12 @@ performance for precision.
 
 ## Flexibility
 
-Unlike [Redux](https://redux.js.org/) or similar state management libraries, **RxDeep** doesn't require
-you to issue changes at the root of the state-tree, maintain a singular store, etc. A `State` is basically an enhanced
-[`Subject`](https://rxjs.dev/guide/subject) so you could use it as flexibly.
+**RxDeep**, unlike libraries such as [Redux](https://redux.js.org/), doesn't require your changes to be funneled
+through specific channels. You can freely issue changes to any part of the state-tree, so for example you can only
+expose relevant parts of the state-tree to modules/components.
 
-The only limitation (similar to [Redux](https://redux.js.org/)) is that you need to issue changes while
-respecting object immutability (e.g. change array reference when you change content of array).
-Since you can make changes on leaf-nodes of the state tree (which are always raw objects such as `string`s),
-and in cases when you need to issue changes higher up the state tree you can utilize likes of the spread operator `...`
-for respecting object immutability, in rare cases this limitation should further complicate your code.
+The only limitation (similar to [Redux](https://redux.js.org/)) is that you need to respect object immutability.
+Basically do not change an object without changing its reference.
 
 **DON'T**:
 
@@ -172,16 +187,17 @@ state.sub(1).sub('name').value = 'Dude';
   trace: {
     head: { sub: 1 },
     rest: { head: { sub: 'name' } }
-  } 
+  },
+  from: ..., to: 'Dude'
 }
 ```
 
-Furthermore, `Keyed` states provide detailed array changes, i.e. additions/deletions on particular indexes,
+Furthermore, `KeyedState`s provide detailed array changes, i.e. additions/deletions on particular indexes,
 or items being moved from one index to another.
 
 ```ts
 const state = new State([{ id: 101, name: 'Jack' }, { id: 102, name: 'Jill' }]);
-const keyed = new Keyed(state, p => p.id);
+const keyed = new KeyedState(state, p => p.id);
 
 keyed.changes().subscribe(console.log);        // --> Log changes
 
@@ -207,6 +223,21 @@ state.value = [
 
 <br>
 
+## Change Verification
+
+You can verify changes occuring on the state-tree (or on a particular sub-tree). **RxDeep** will utilize
+the change history to revert unverified changes on affected sub-states:
+
+```ts
+const s = new State([{ val: 21 }, { val: 22 }, { val: 23 }]);
+const v = new VerifiedState(s, change => change.value.reduce((t, i) => t + i.val) % 2 === 0);
+
+v.sub(0).sub('val').value = 22; // --> change denied, local changes automatically reverted
+v.sub(0).sub('val').value = 23; // --> change accepted and routed through the state-tree
+```
+
+<br>
+
 ## Extensibility
 
 Each `State` is an [`Observable`](https://rxjs.dev/guide/observable) 
@@ -224,8 +255,8 @@ state trees distributed across a network, states trees remaining in sync with so
 
 ## Thin and Type Safe
 
-**RxDeep** includes minimal surface area (effectively `State` and `Keyed` objects), focusing only on
-effectively tracking and propagating changes across a reactive state tree. Its bundle size is roughly `1KB`,
+**RxDeep** includes minimal surface area, focusing only on
+effectively tracking and propagating changes across a reactive state tree. Its bundle size is roughly `~1.5KB`,
 not including dependencies. Including dependencies (which is [RxJS](https://rxjs.dev), and hence most probably
 already included in your bundle), it would be `~6.5KB`.
 
