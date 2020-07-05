@@ -1,12 +1,9 @@
-import { State, VerifiedState } from '../src';
+import { State, KeyedState } from '../src';
 
 
-const s = new State(12);
-const v = new VerifiedState(s, change => change.from < change.to);
+const s = new State([{ id: 21, name: 'eugene'}, { id: 22, name: 'john' }]);
+const k = new KeyedState(s, p => p.id);
 
-v.subscribe(console.log);
-v.value = 10;
-v.value = 14;
-v.value = 8;
-v.value = 13;
-v.value = 15;
+k.key(22).sub('name').subscribe(console.log);
+s.value = [s.value[1], s.value[0]];
+s.sub(0).value = { id: 22, name: 'jack' };

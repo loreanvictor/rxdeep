@@ -47,6 +47,25 @@ state.sub(1).sub('name').value = 'Jafet';            // --> logs `Jafet`
 
 <br>
 
+Verify changes to the state:
+
+```ts
+import { State, VerifiedState } from 'rxdeep';
+
+const s = new State(12);
+const v = new VerifiedState(s, change => change.from < change.to); // --> only increasing numbers
+
+v.subscribe(console.log);
+
+v.value = 10; // --> logs 12
+v.value = 14; // --> logs 14
+v.value = 9;  // --> logs 14
+v.value = 13; // --> logs 14
+v.value = 15; // --> logs 15
+```
+
+<br>
+
 A `State` is an [`Observer`](https://rxjs.dev/guide/observer):
 
 ```ts
@@ -92,24 +111,99 @@ Track index of a specific `key`:
 keyed.index(101).subscribe(console.log);      // --> logs 0, 1
 ```
 
+---
+
+# UI Frameworks
+
+**RxDeep** is not by any means limited to frontend use, though most backend designs
+are state-less or with dedicated services managing states, which means its most common use-case is in the frontend.
+**RxDeep** is also completely framework agnostic, with a precision emission system that allows
+surgical updates even if you are using pure JavaScript without the need for a Virtual DOM or similar mechanisms.
+
+This precision emission system also should reduce the change detection / DOM reconcilliation load on
+most popular frameworks, as re-renders can be requested only when something has truly changed, and specifically
+on the DOM sub-tree that have really changed.
+
 <br>
 
-Verify changes to the state:
+## ![](https://reactjs.org/favicon.ico) React
+
+You can use [RxJS-hooks](https://github.com/LeetCode-OpenSource/rxjs-hooks) for fetching and rendering `State`s in [React](https://reactjs.org/) components.
+This _should_ also result in better performance as it should reduce number of redundant tree diffs conducted by React.
+
+```tsx
+/*!*/import { useObservable } from 'rxjs-hooks';
+
+const state = new State(...);
+
+function MyComponent(...) {
+/*!*/  const value = useObservable(() => state.sub('something')) || {};
+/*!*/  return <div>{value.property}</div>
+}
+```
+> :Buttons
+> > :Button label=Real World Example, url=https://stackblitz.com/edit/react-rxdeep
+
+<br>
+
+## ![](https://angular.io/assets/images/favicons/favicon.ico) Angular
+
+You can use [Angular](https://angular.io/)'s [async pipe](https://angular.io/guide/observables-in-angular) to render `State`s or
+sub-states:
+
+```html
+<div>{{state | async}}</div>
+<div>{{state.sub('property') | async}}</div>
+```
+
+You can also utilize [Angular](https://angular.io/)'s `[(ngModel)]` syntax to bind `State` objects to inputs:
+
+```html
+<input [(ngModel)]="state.sub('property').value" type="text" />
+```
+
+> :Buttons
+> > :Button label=Real World Example, url=https://stackblitz.com/edit/angular-rxdeep
+
+<br>
+
+## ![](https://vuejs.org/images/logo.png) Vue.js
+
+You can use [vue-rx](https://github.com/vuejs/vue-rx) to render `State` objects in your Vue apps, which should (I don't know if it would)
+yield similar performance improvements:
 
 ```ts
-import { State, VerifiedState } from 'rxdeep';
+/*!*/import VueRx from 'vue-rx';
+/*!*/Vue.use(VueRx);
 
-const s = new State(12);
-const v = new VerifiedState(s, change => change.from < change.to); // --> only increasing numbers
-
-v.subscribe(console.log);
-
-v.value = 10; // --> logs 12
-v.value = 14; // --> logs 14
-v.value = 9;  // --> logs 14
-v.value = 13; // --> logs 14
-v.value = 15; // --> logs 15
+new Vue({
+  el: '#app',
+/*!*/  subscriptions: {
+/*!*/    state,
+/*!*/    name: state.sub('name')
+/*!*/  }
+});
 ```
+
+```html
+<div>{{ state }}</div>
+<div>{{ name }}</div>
+```
+
+<br>
+
+## ![](https://upload.wikimedia.org/wikipedia/commons/9/99/Unofficial_JavaScript_logo_2.svg) Pure JavaScript
+
+As mentioned above, **RxDeep** provides precision change emission, which means you can directly listen to the
+state changes and surgically update DOM tree accordingly:
+
+```js
+state.sub('name').subscribe(name => nameElement.textContent = name);
+```
+
+Specifically, you can utilize `KeyedState`s and their `.changes()` method to receive [detailed
+array changes](#change-history) that enable you to precisely modify dynamic DOM trees based on collections
+and arrays.
 
 ---
 

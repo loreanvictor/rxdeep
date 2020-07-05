@@ -31,7 +31,10 @@ export function content(_content: HTMLElement, toc: HTMLElement, renderer: Rende
                   /> : false
             }>{toc}</ToC>
           }>
-          <style>{`p { line-height: 1.5rem }`}</style>
+          <style>{`
+            p { line-height: 1.5rem }
+            h1 img, h2 img, h3 img, h4 img { width: 2rem; vertical-align: bottom; }
+          `}</style>
       {_content}
       <ContentNav content={_content}/>
     </Page>

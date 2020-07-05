@@ -148,6 +148,41 @@ describe('State', () => {
     }).complete();
   });
 
+  it('should close its own subscriptions when completed.', () => {
+    const s = new State(undefined);
+    const sub = s.subscribe();
+    sub.closed.should.be.false;
+    s.complete();
+    sub.closed.should.be.true;
+  });
+
+  it('should close its subscriptions without closing subscriptions to parent states.', () => {
+    const s = new State([1, 2, 3]);
+    const s2 = s.sub(1);
+    const sub1 = s.subscribe();
+    const sub2 = s2.subscribe();
+
+    sub1.closed.should.be.false;
+    sub2.closed.should.be.false;
+    s2.complete();
+    sub1.closed.should.be.false;
+    sub2.closed.should.be.true;
+  });
+
+  it('should close subscriptions to its sub-tree without affecting other sub-trees.', () => {
+    const root = new State([{x: 2}, {x: 3}]);
+    const s1 = root.sub(0);
+    const s2 = root.sub(0);
+    const sub1 = s1.sub('x').subscribe();
+    const sub2 = s2.sub('x').subscribe();
+
+    sub1.closed.should.be.false;
+    sub2.closed.should.be.false;
+    s2.complete();
+    sub1.closed.should.be.false;
+    sub2.closed.should.be.true;
+  });
+
   describe('.sub()', () => {
     it('should set the initial value correctly based given key and its own value.', () => {
       new State('hellow').sub(1).value.should.equal('e');

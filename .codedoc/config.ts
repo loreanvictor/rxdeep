@@ -16,7 +16,7 @@ export const config = /*#__PURE__*/configuration({
   },
   page: {
     title: {
-      base: 'Rxdeep'
+      base: 'RxDeep'
     },
     favicon: 'favicon.ico',
     fonts: {
@@ -24,7 +24,24 @@ export const config = /*#__PURE__*/configuration({
         name: 'Oxygen',
         url: 'https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400&display=swap',
         fallback: 'sans-serif'
+      },
+      code: {
+        name: 'DM Mono',
+        url: 'https://fonts.googleapis.com/css2?family=DM+Mono:wght@300&display=swap',
+        fallback: 'monospace'
       }
+    },
+    meta: {
+      description: 'Reactive state management using RxJS. Flexibly make changes, listen on changes on any part of the state-tree, verify changes, track change history, distribute state-tree across network, etc.',
+      subject: 'Reactive state management using RxJS. Flexibly make changes, listen on changes on any part of the state-tree, verify changes, track change history, distribute state-tree across network, etc.',
+      keywords: [
+        'State Management',
+        'Reactive',
+        'RxJS',
+        'State Tree',
+        'Object Tree',
+        'Redux'
+      ]
     }
   },
   plugins: [ formulaPlugin, ],

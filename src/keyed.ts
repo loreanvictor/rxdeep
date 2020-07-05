@@ -1,15 +1,14 @@
-import { Observable, Observer } from 'rxjs';
-import { share, map, filter } from 'rxjs/operators';
+import { Observable, Observer, Subject } from 'rxjs';
+import { map, filter, multicast, refCount, startWith } from 'rxjs/operators';
 
 import { State } from './state';
 import { KeyFunc, ListChanges, Change, EqualityCheck } from './types';
 import { Watcher } from './util/watcher';
 
 
-export class KeyedState<T>
-  extends Observable<T[] | undefined>
-  implements Observer<T[] | undefined> {
+export class KeyedState<T> extends Observable<T[] | undefined> implements Observer<T[] | undefined> {
   private _changes: Observable<[Change<T[]>, ListChanges<T>]>;
+  private _changesub: Subject<[Change<T[]>, ListChanges<T>]>;
   private _watcher: Watcher<T>;
   private _traceKey: string;
 
@@ -18,15 +17,17 @@ export class KeyedState<T>
     readonly keyfunc: KeyFunc<T>,
   ) {
     super((observer: Observer<T[] | undefined>) => {
-      return this._changes.pipe(map(([change, _]) => change.value)).subscribe(observer);
+      return this._changes.pipe(map(([change, _]) => change.value), startWith(this.value)).subscribe(observer);
     });
 
     this._traceKey = Math.random().toString(36).substring(2, 15)
                     + Math.random().toString(36).substring(2, 15);
     this._watcher = new Watcher(state.value, keyfunc);
+    this._changesub = new Subject<[Change<T[]>, ListChanges<T>]>();
     this._changes = this.state.downstream.pipe(
       map(change => [change, this._watcher.changes(change.value)] as [Change<T[]>, ListChanges<T>]),
-      share(),
+      multicast(() => this._changesub),
+      refCount(),
     );
   }
 
@@ -35,7 +36,7 @@ export class KeyedState<T>
   }
 
   error(err: any) { this.state.upstream.error(err); }
-  complete() { this.state.upstream.complete(); } // FIXME: this completes the original state!
+  complete() { this._changesub.complete(); }
 
   get value() { return this._watcher.last; }
   set value(t: T[]) { this.next(t); }
