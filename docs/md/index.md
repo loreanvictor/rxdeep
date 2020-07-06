@@ -12,7 +12,7 @@ npm i rxdeep
 
 # Quick Tour
 
-Create state:
+Create a [`State`](/docs/state):
 
 ```ts
 import { State } from 'rxdeep';
@@ -21,7 +21,7 @@ const state = new State([ { name: 'John' }, { name: 'Jack' }, { name: 'Jill' } ]
 
 <br>
 
-Listen to sub-state:
+Listen to a [sub-state](/docs/state#sub-states):
 
 ```ts
 state.sub(1).sub('name').subscribe(console.log); // --> subscribes to property `name` of object at index 1 of the array
@@ -115,12 +115,13 @@ keyed.index(101).subscribe(console.log);      // --> logs 0, 1
 
 # UI Frameworks
 
-**RxDeep** is not by any means limited to frontend use, though most backend designs
+**RxDeep** is not by any means limited to frontend use. However most backend designs
 are state-less or with dedicated services managing states, which means its most common use-case is in the frontend.
-**RxDeep** is also completely framework agnostic, with a precision emission system that allows
-surgical updates even if you are using pure JavaScript without the need for a Virtual DOM or similar mechanisms.
 
-This precision emission system also should reduce the change detection / DOM reconcilliation load on
+**RxDeep** is also completely framework agnostic, with a precise emission system that allows
+surgical updates even if you are using pure JavaScript without the need for a Virtual DOM, passive change detection, etc.
+
+These precise emissions also should reduce the change detection / DOM reconcilliation load on
 most popular frameworks, as re-renders can be requested only when something has truly changed, and specifically
 on the DOM sub-tree that have really changed.
 

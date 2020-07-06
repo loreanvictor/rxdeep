@@ -1,20 +1,12 @@
 import { State } from '../src';
 
-
-const state = new State({
-  todos: [{title: 'Do This'}, {title: 'Do That'}],
-  draft: ''
+const team = new State({
+  name: 'Awesome Team',
+  people: [
+    { id: 101, name: 'Julia' },
+    { id: 102, name: 'Jeremy' },
+  ]
 });
 
-const todos = state.sub('todos');
-
-const addTodo = () => state.value = {
-  todos: state.value.todos.concat([{title: state.value.draft }]),
-  draft: ''
-};
-
-todos.sub('length').subscribe(console.log);
-todos.subscribe(console.log);
-
-state.sub('draft').value = 'Halo!';
-addTodo();
+team.sub('people').sub(0).sub('name').subscribe(console.log);
+team.sub('people').sub(0).sub('name').value = 'Julia';

@@ -18,11 +18,15 @@ const BubbleStyle = themedStyle<CodedocTheme>(theme => ({
     position: 'absolute',
     backdropFilter: 'blur(6px)',
     WebkitBackdropFilter: 'blur(6px)',
+    backfaceVisibility: 'hidden',
+    WebkitBackfaceVisibility: 'hidden',
     bottom: 0,
     opacity: 0,
     border: `6px solid ${color(theme.dark.background).alpha(.08).toString()}`,
     animation: '$bubble-motion 8s ease-in infinite',
-    'body.dark &': {borderColor: color(theme.light.background).alpha(.08).toString()},
+    'body.dark &': {
+      borderColor: color(theme.light.background).alpha(.08).toString()
+    },
     '@media (prefers-color-scheme: dark)': {
       'body:not(.dark-mode-animate) &': {
         borderColor: color(theme.light.background).alpha(.1).toString()

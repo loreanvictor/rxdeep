@@ -18,7 +18,7 @@ export const config = /*#__PURE__*/configuration({
     title: {
       base: 'RxDeep'
     },
-    favicon: 'favicon.ico',
+    favicon: '/favicon.ico',
     fonts: {
       text: {
         name: 'Oxygen',
