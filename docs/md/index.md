@@ -217,9 +217,12 @@ state changes and surgically update DOM tree accordingly:
 state.sub('name').subscribe(name => nameElement.textContent = name);
 ```
 
-Specifically, you can utilize `KeyedState`s and their `.changes()` method to receive [detailed
+Specifically, you can utilize `KeyedState` and its `.changes()` method to receive [detailed
 array changes](#change-history) that enable you to precisely modify dynamic DOM trees based on collections
 and arrays.
+
+> :Buttons
+> > :Button label=Real World Example, url=https://stackblitz.com/edit/vanilla-rxdeep
 
 ---
 
