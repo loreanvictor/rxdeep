@@ -3,7 +3,7 @@ import { should, expect } from 'chai'; should();
 import { KeyedState } from '../keyed';
 import { State } from '../state';
 
-describe.only('KeyedState', () => {
+describe('KeyedState', () => {
   it('should track objects based on provided key function instead of indexes.', () => {
     const r: string[] = [];
 

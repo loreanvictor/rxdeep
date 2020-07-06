@@ -190,6 +190,22 @@ new Vue({
 <div>{{ name }}</div>
 ```
 
+You can use `v-model` syntax to directly bind inputs and `State` objects:
+
+```ts
+new Vue({
+  ...
+  subscriptions: { ... },
+/*!*/  data: { state }
+})
+```
+```html
+/*!*/<input type="text" v-model="state.sub('name').value"/>
+```
+
+> :Buttons
+> > :Button label=Real World Example, url=https://stackblitz.com/edit/vue-rxdeep
+
 <br>
 
 ## ![](https://upload.wikimedia.org/wikipedia/commons/9/99/Unofficial_JavaScript_logo_2.svg) Pure JavaScript
@@ -215,7 +231,7 @@ Here are the design goals/features of **RxDeep**, setting aside from other react
 
 ## Performance
 
-**RxDeep** is extremely fast and light-weight in terms of memory consumption and computation, utilizing pure mappings
+**RxDeep** is extremely fast and light-weight in terms of memory consumption and computation, utilizing pure (multicasted) mappings
 on the root of the state-tree for reading/writing on the whole tree.
 
 The only performance hotspot are `KeyedState`s, as they conduct an [O(n)](:Formula) operation on change emission

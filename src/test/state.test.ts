@@ -183,6 +183,17 @@ describe('State', () => {
     sub2.closed.should.be.true;
   });
 
+  it('should properly multi-cast to sub-state subscriptions.', () => {
+    const r: number[] = [];
+    const s = new State({x: 42});
+    const sub = s.sub('x');
+    sub.subscribe(n => r.push(n!!));
+    sub.subscribe(n => r.push(n!!));
+
+    s.value = {x : 43};
+    r.should.eql([42, 42, 43, 43]);
+  });
+
   describe('.sub()', () => {
     it('should set the initial value correctly based given key and its own value.', () => {
       new State('hellow').sub(1).value.should.equal('e');

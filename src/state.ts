@@ -1,15 +1,14 @@
 import { Observable, Observer, Subject } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, map, tap, multicast, refCount } from 'rxjs/operators';
 
 import { Change, EqualityCheck, ChangeTraceRest } from './types';
-import { takeUntilCompletes } from './util/take-until-completes';
 
 
 export class State<T> extends Observable<T | undefined> implements Observer<T | undefined> {
   private _value: T | undefined;
   readonly downstream: Observable<Change<T>>;
   readonly upstream: Observer<Change<T>>;
-  private _close = new Subject<void>();
+  private _changesub: Subject<Change<T>>;
 
   constructor(initial: T | undefined);
   constructor(initial: T | undefined, downstream: Observable<Change<T>>, upstream: Observer<Change<T>>);
@@ -23,18 +22,20 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
     });
 
     this._value = initial;
+    this._changesub = new Subject<Change<T>>();
     this.downstream = downstream.pipe(
       tap(change => {
         if (change.value !== this._value) this._value = change.value;
       }),
-      takeUntilCompletes(this._close),
+      multicast(() => this._changesub),
+      refCount(),
     );
     this.upstream = upstream || downstream as any as Observer<Change<T>>;
   }
 
   next(t: T | undefined) { this.upstream.next({ value: t, from: this.value, to: t }); }
   error(err: any) { this.upstream.error(err); }
-  complete() { this.upstream.complete(); this._close.complete(); }
+  complete() { this.upstream.complete(); this._changesub.complete(); }
 
   get value() { return this._value as any; }
   set value(t: T) { this.next(t); }
