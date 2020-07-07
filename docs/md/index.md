@@ -238,9 +238,11 @@ Here are the design goals/features of **RxDeep**, setting aside from other react
 **RxDeep** is extremely fast and light-weight in terms of memory consumption and computation, utilizing pure (multicasted) mappings
 on the root of the state-tree for reading/writing on the whole tree.
 
-The only performance hotspot are `KeyedState`s, as they conduct an [O(n)](:Formula) operation on change emission
-from state-tree upstream, involving a user-provided _key_ function. To mitigate potential performance hits, `Keyed` states
-do share this computation across subscriptions.
+Note that user-provided functions are utilized during particular operations, which might result in some loss of performance
+if said functions aren't fast enough.
+
+> :Buttons
+> > :Button label=Learn More, url=/docs/performance
 
 <br>
 
@@ -251,12 +253,12 @@ emit values when the value of the sub-state has changed (or a change is issued o
 So you could subscribe heavy-weight operations (such as DOM re-rendering)
 on sub-states.
 
-Sometimes **RxDeep** is unable to determine the address of a change and needs
-to rely on equality checks to be able to properly down-propagate changes.
-Equality operator `===` is used by defaul, which might result in redundant emissions on complex objects.
-If you need absolute precision,
-you can provide custom equality checks (e.g. [`lodash.isEqual()`](https://lodash.com/docs/4.17.15#isEqual)), trading
-performance for precision.
+For performance reasons, **RxDeep**'s precision is not 100%, and in corner cases you might get redundant
+emissions. However, **RxDeep** does allow you to trade some performance for that added precision, if your particular
+use-case requires it.
+
+> :Buttons
+> > :Button label=Learn More, url=/docs/state#trace-less-changes
 
 <br>
 
@@ -269,20 +271,25 @@ expose relevant parts of the state-tree to modules/components.
 The only limitation (similar to [Redux](https://redux.js.org/)) is that you need to respect object immutability.
 Basically do not change an object without changing its reference.
 
-**DON'T**:
+<br>
+
+<span style="color: #fa163f">**DON'T:**</span>
 
 ```ts
 state.value.push(x);                   // --> WRONG!
 state.value.x = y;                     // --> WRONG!
 ```
 
+<span style="color: #27aa80">**DO:**</span>
 
-**DO**:
 ```ts
 state.value = state.value.concat(x);   // --> CORRECT!
 state.sub('x').value = y;              // --> CORRECT!
 state.value = { ...state.value, x: y } // --> CORRECT!
 ```
+
+> :Buttons
+> > :Button label=Learn More, url=/docs/state#change-immutability
 
 <br>
 

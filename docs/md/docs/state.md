@@ -106,13 +106,15 @@ reference when changing the value of a `State`.
 This happens automatically with raw values (`number`, `boolean`, `string`, etc.). For more complex values (objects and arrays),
 use the rest operator `...` or methods that create a new reference.
 
-**DONT**:
+<br>
+
+<span style="color: #fa163f">**DON'T:**</span>
 
 ```ts
 state.value.push(x);
 ```
 
-**DO**:
+<span style="color: #27aa80">**DO:**</span>
 
 ```ts
 state.value = state.value.concat(x);
@@ -122,13 +124,13 @@ state.next(state.value.concat(x));
 
 <br>
 
-**DONT**:
+<span style="color: #fa163f">**DON'T:**</span>
 
 ```ts
 state.value.x = 42;
 ```
 
-**DO**:
+<span style="color: #27aa80">**DO:**</span>
 
 ```ts
 state.value = { ...state.value, x: 42 }
@@ -268,5 +270,152 @@ team.sub('name').value = 'That Other Team';
 > if it is not subscribed to. When you change its value, it will issue a change to
 > the state-tree regardless of whether or not it is subscribed, the change
 > might have the wrong history if `.value` is not in sync.
+
+---
+
+## Change History
+
+You can subscribe to `.downstream` property of a `State` to listen for changes occuring to it
+(instead of just updated values):
+
+```ts
+/*!*/team.sub('people').downstream.subscribe(console.log);
+team.sub('people').sub(0).sub('name').value = 'Jackie';
+
+// Logs:
+// > {
+// >   value: [ { id: 101, name: 'Jackie', id: 102, name: 'Jeremy' } ],
+// >   from: 'Julia',
+// >   to: 'Jackie',
+// >   trace: { head: { sub: 0 } }, rest: { head: { sub: 'name' }, rest: undefined }
+// > }
+```
+
+<br>
+
+Each change object has the following properties:
+
+```ts
+type Change<T> = {
+  value: T | undefined;           // --> value of current state if change was applied to it
+  from: any;                      // --> the original value of the original state issuing the change
+  to: any;                        // --> the updated value of the original state issuing the change
+  trace?: ChangeTrace<T>;         // --> the trace of the change
+}
+
+type ChangeTrace<T> = {
+  head: {                         // --> determines which sub-state the change bubbled up from
+    sub: keyof T;                 // --> the sub-key of the sub-state
+    ...
+  },
+  rest?: ChangeTrace<T>            // --> potentially the rest of the change trace
+}
+```
+
+> :Buttons
+> > :Button label=Read More About Changes, url=/docs/change
+
+---
+
+## Under the Hood
+
+A `State` is constructed with an initial value, a _downstream_ (`Observable<Change>`), and an _upstream_ (`Observer<Change>`).
+**Downstream** is basically where changes to this state come from.
+**Upstream** is where this state should report its changes.
+
+```ts
+// In this example, the value of `state` is updated with a debounce, so
+// changes made in rapid succession are supressed.
+
+const echo = new Subject<Change<number>>();
+/*!*/const state = new State(3, echo.pipe(debounceTime(300)), echo);
+
+state.subscribe(console.log);
+
+state.value = 4;                           // --> gets supressed
+state.value = 10;                          // --> gets through
+setTimeout(() => state.value = 15, 310);   // --> gets through
+setTimeout(() => state.value = 17, 615);   // --> gets supressed
+setTimeout(() => state.value = 32, 710);   // --> gets through
+
+// Logs:
+// > 3
+// > 10
+// > 15
+// > 32
+```
+```ts
+// In this example, the value of `state` will remained capped at 10.
+
+const echo = new Subject<Change<number>>();
+/*!*/const state = new State(3,
+/*!*/  echo.pipe(map(change => ({
+/*!*/    ...change,
+/*!*/    value: Math.min(change.value!!, 10),
+/*!*/  }))),
+/*!*/  echo
+/*!*/);
+
+state.subscribe(console.log);
+
+state.value = 4;    // --> ok
+state.value = 12;   // --> changes to 10
+state.value = 9;    // --> ok
+state.value++;      // --> ok
+state.value++;      // --> caps
+
+// Logs:
+// > 3
+// > 4
+// > 10
+// > 9
+// > 10
+// > 10
+```
+
+
+<br>
+
+When a new value is set on a `State`, it creates a [`Change`](/docs/change) object and passes it up the
+upstream. The `State` **WILL NOT** immedialtely emit said value. Instead, it trusts that if the value
+corresponding to a particular change should be emitted, it will eventually come down the downstream.
+Thats how we are able to modify the value of requested changes in above examples.
+
+The upstream and downstream of sub-states is set by the parent state. When a change is issued
+to a sub-state, the parent state will pick up the change, add the corresponding sub-key to the
+change trace, and send it through its own upstream. When a change comes down its downstream,
+it will match it with sub-states using the sub-key specified in the change trace and down-propagate
+it accordingly, removing the head of the change trace in the process.
+
+> [**touch_app**](:Icon) **IMPORTANT**
+>
+> For performance reasons, a `State` will change its local `.value` when it is sending changes
+> up the upstream, but will not emit them. This means if you want to completely reverse the effect
+> of some particular change, you should emit a reverse change object on the downstream in response.
+> Simply ignoring a change will cause the `State`'s value to go out of sync with the change history
+> and the emission history.
+
+<br>
+
+### Trace-less Changes
+
+It can happen that a received change lacks any trace. This is because the change was issued on the same
+or lower depth of the state-tree. In such a case, the `State` cannot use the trace to determine which
+sub-states should receive the change.
+
+In this situation, the parent state would rely on equality checks to see if a particular change would
+affect a particular sub-state. By default, the `===` operator is used. This is pretty fast and works
+fine for most leaf-states (which typically have raw values). However, this might result in redundant emissions
+by states whose value type is not raw (and hence `===` returns `false` despite the two objects being essentially the same).
+
+If you need further emission precision on these cases as well, you can simply provide your own equality check
+to `.sub()` method. Note that this will most probably incur some performance costs, in exchange for the added
+precision it might provides:
+
+```ts
+import { isEqual } from 'lodash'; // @see [lodash.isEqual()](https://lodash.com/docs/4.17.15#isEqual)
+
+const subState = state.sub(key, isEqual);
+```
 
 > :ToCPrevNext
