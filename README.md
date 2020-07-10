@@ -70,7 +70,6 @@ Due to it being based on [RxJS](https://rxjs.dev) and having high interop with i
 Because of its precise change emissions, using **RxDeep** in conjuction with popular UI frameworks should actually speed them up (since
 it results in less burden for the underlying change detection mechanisms of these frameworks).
 
-<br>
 
 [👉 Learn more.](https://loreanvictor.github.io/rxdeep/#ui-frameworks)
 
