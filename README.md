@@ -4,7 +4,7 @@
 npm i rxdeep
 ```
 
-**RxDeep** provides fast and precise[<sup>*</sup>](#precision) reactive state management, in a flexible and unopinionated manner. Make changes at any point on the state tree, and listen to changes on particular parts of your tree, with a precision emission system that ensures you only get values when something has truly changed[<sup>*</sup>](#precision).
+**RxDeep** provides fast and precise[<sup>*</sup>](#precision) reactive state management in JavaScript / TypeScript, in a flexible and unopinionated manner. Make changes at any point on the state tree, and listen to changes on particular parts of your tree, with a precision emission system that ensures you only get values when something has truly changed[<sup>*</sup>](#precision).
 
 [👉 Read the docs for more info.](https://loreanvictor.github.io/rxdeep/)
 
@@ -80,6 +80,51 @@ This precision is sufficient for most common use-cases. However, if you need abs
 it allows you to trade-off performance for that extra precision.
 
 [👉 Learn more.](https://loreanvictor.github.io/rxdeep/docs/state#trace-less-changes)
+
+<br><br>
+
+## Prior Work
+
+**RxDeep** is not necessarily a replacement / alternative to many existing state management libraries. Typically these libraries provide / enforce some particular patterns which might or might not be useful to a particular application, while **RxDeep** avoids
+any such constraints, instead focusing on providing a performant and precise reactive state tree.
+
+Here is how **RxDeep** compares / relates to some of the most well-known state management libraries:
+
+<br>
+
+### [Redux](https://redux.js.org/)
+
+Redux is a particular state management pattern (and a library providing it), while **RxDeep** is not. You actually can implement
+the Redux pattern using **RxDeep** state-trees if you so choose to.
+
+Redux as a library doesn't have a concept of precision, i.e. you cannot listen to changes on a particular part of the state-tree in isolation.
+This is simply because Redux was designed primarily to be coupled with React, and so delegates figuring actual scope of changes to its Virtual DOM
+mechanism.
+
+In contrast, precision is the main feature of **RxDeep**, which means surgically precise changes reach the final UI layer.
+With **RxDeep** the scope of each change is computed much more efficiently on the data layer (on the state-tree itself),
+instead of it being passed down to some external underlying library.
+
+<br>
+
+### [MobX](https://mobx.js.org/README.html)
+
+**RxDeep** and MobX share some core design philosophies in terms of being unopinionated reactive state management solutions. The main difference
+is MobX's implicit approach for automatically state / expression dependencies, while **RxDeep** relies on the power of RxJS for explicitly
+defining / manipulating streams.
+
+This brings much more fine grained control and extensibility, at the expense of face-value learnability (as RxJS does seem more complicated to newcomers). 
+However in practice MobX syntax (e.g. [computed values](https://mobx.js.org/README.html#computed-values)),
+doesn't differ much from the equivalent RxJS syntax (e.g. [the map pipe](https://www.learnrxjs.io/learn-rxjs/operators/transformation/map)), and
+the actual complexity of RxJS kicks in for operations beyond the scope of MobX.
+
+<br>
+
+### [Focal](https://github.com/grammarly/focal)
+
+Amongst mentioned libraries, **RxDeep** shares most concepts and ideas with Focal. Focal, however, is specifically designed specifically to work with
+React, while **RxDeep** is completely framework agnostic. This also means that similar to Redux, precision is not a priority for Focal, while it is
+the main focus of **RxDeep**.
 
 <br><br>
 
