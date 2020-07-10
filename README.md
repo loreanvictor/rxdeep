@@ -115,7 +115,7 @@ instead of it being passed down to some external underlying library.
 ### [MobX](https://mobx.js.org/README.html)
 
 **RxDeep** and MobX share some core design philosophies in terms of being unopinionated reactive state management solutions. The main difference
-is MobX's implicit approach for automatically state / expression dependencies, while **RxDeep** relies on the power of RxJS for explicitly
+is MobX's implicit approach for automatically deducing state / expression dependencies, while **RxDeep** relies on the power of RxJS for explicitly
 defining / manipulating streams.
 
 This brings much more fine grained control and extensibility, at the expense of face-value learnability (as RxJS does seem more complicated to newcomers). 
