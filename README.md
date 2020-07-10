@@ -20,35 +20,25 @@ import { State } from 'rxdeep';
 const state = new State([ { name: 'John' }, { name: 'Jack' }, { name: 'Jill' } ]);
 ```
 
-<br>
-
 ▷ Listen to changes on `'name'` property of index 1 on the list:
 ```ts
 state.sub(1).sub('name').subscribe(console.log);     // --> logs `Jack`
 ```
-
-<br>
 
 ▷ You can modify the top-level state:
 ```ts
 state.value = [ { name: 'Julia' }, ...state.value ]; // --> logs `John`, since `John` is index 1 now
 ```
 
-<br>
-
 ▷ Or mid-level states:
 ```ts
 state.sub(1).value = { name: 'Josef' };              // --> logs `Josef`
 ```
 
-<br>
-
 ▷ Or another sub-state with the same address:
 ```ts
 state.sub(1).sub('name').value = 'Jafet';            // --> logs `Jafet`
 ```
-
-<br>
 
 ▷ [RxJS](https://rxjs.dev) interop:
 ```ts
