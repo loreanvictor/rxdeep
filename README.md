@@ -49,6 +49,11 @@ interval(1000)
 .pipe(map(i => ({ name: `Jarvis #${i}`})))
 .subscribe(state.sub(1));                            // --> logs `Jarvis #0`, `Jarvis #1`, `Jarvis #2`, ...
 ```
+```ts
+import { debounceTime } from 'rxjs/operators';
+
+state.sub(1).pipe(debounceTime(1000)).subscribe(console.log); // --> debounces changes for 1 second
+```
 
 [👉 Learn more.](https://loreanvictor.github.io/rxdeep/#quick-tour)
 
