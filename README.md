@@ -50,8 +50,6 @@ interval(1000)
 .subscribe(state.sub(1));                            // --> logs `Jarvis #0`, `Jarvis #1`, `Jarvis #2`, ...
 ```
 
-<br>
-
 [👉 Learn more.](https://loreanvictor.github.io/rxdeep/#quick-tour)
 
 <br><br>
@@ -70,11 +68,9 @@ Due to it being based on [RxJS](https://rxjs.dev) and having high interop with i
 Because of its precise change emissions, using **RxDeep** in conjuction with popular UI frameworks should actually speed them up (since
 it results in less burden for the underlying change detection mechanisms of these frameworks).
 
-
 [👉 Learn more.](https://loreanvictor.github.io/rxdeep/#ui-frameworks)
 
-
-<br>
+<br><br>
 
 ### Precision
 
