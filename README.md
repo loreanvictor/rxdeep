@@ -120,8 +120,9 @@ defining / manipulating streams.
 
 This brings much more fine grained control and extensibility, at the expense of face-value learnability (as RxJS does seem more complicated to newcomers). 
 However in practice MobX syntax (e.g. [computed values](https://mobx.js.org/README.html#computed-values)),
-doesn't differ much from the equivalent RxJS syntax (e.g. [the map pipe](https://www.learnrxjs.io/learn-rxjs/operators/transformation/map)), and
-the actual complexity of RxJS kicks in for operations beyond the scope of MobX.
+doesn't differ much from the equivalent RxJS syntax (e.g. [the map pipe](https://www.learnrxjs.io/learn-rxjs/operators/transformation/map)). In fact,
+MobX's implicit deduction approach raises implicit constraints and considerations that would complicate the matter, while the explicit approach of
+RxJS avoids that. Besides, the actual complexity of RxJS kicks in for operations beyond the scope of MobX.
 
 <br>
 
