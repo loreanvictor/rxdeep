@@ -10,7 +10,7 @@ npm i rxdeep
 
 <br><br>
 
-### Example Usage
+## Example Usage
 
 ▷ Create a state object:
 
@@ -54,7 +54,7 @@ interval(1000)
 
 <br><br>
 
-### UI Frameworks
+## UI Frameworks
 
 **RxDeep** is completely framework agnostic. It is also by no means limited to use on frontend (though that is understandably most common use-case).
 Due to it being based on [RxJS](https://rxjs.dev) and having high interop with it, you can easily use it anywhere that you can use RxJS.
@@ -72,7 +72,7 @@ it results in less burden for the underlying change detection mechanisms of thes
 
 <br><br>
 
-### Precision
+## Precision
 
 Precision means that `State`s (nodes on the state-tree) only emit values when there is a change to them (or when a change is directly issued
 to them or some other `State` representing the same address on the state-tree). **RxDeep** is as precise as it can get without sacrificing performance.
