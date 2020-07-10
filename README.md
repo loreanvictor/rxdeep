@@ -1,48 +1,57 @@
 ![banner](/rxdeep-banner.png)
 
-[![Build Status](https://badgen.net/travis/loreanvictor/rxdeep?label=build&cache=300&icon=travis)](https://travis-ci.org/loreanvictor/rxdeep)
-[![Code Coverage](https://badgen.net/codecov/c/github/loreanvictor/rxdeep?cache=300&icon=codecov)](https://codecov.io/gh/loreanvictor/rxdeep)
-[![Minzipped Size](https://badgen.net/bundlephobia/minzip/rxdeep@latest?icon=jsdelivr&color=purple)](https://bundlephobia.com/result?p=rxdeep@latest)
-[![NPM Version](https://badgen.net/npm/v/rxdeep?cache=300&icon=npm)](https://www.npmjs.com/package/rxdeep)
-[![Code Quality](https://badgen.net/codacy/grade/423972f1e78b453e8e69581ba4abc058?cache=300&icon=codacy)](https://www.codacy.com/manual/loreanvictor/rxdeep)
-[![License](https://badgen.net/github/license/loreanvictor/rxdeep?icon=github)](LICENSE)
+```bash
+npm i rxdeep
+```
 
-**RxDeep** provides fast and (mostly) precise reactive state management, in a flexible and unopinionated manner.
+**RxDeep** provides fast and (mostly) precise reactive state management, in a flexible and unopinionated manner. Make changes at any point on the state tree, and listen to changes on particular parts of your tree, with a precision emission system that ensures you only get values when something has truly changed[<sup>*</sup>](#precision).
 
-<br>
+[Read the docs for more info.](https://loreanvictor.github.io/rxdeep/)
 
-- **Fast**: Minimum computation, memory allocation, subscriptions, etc.
-- **Precise**<sup>*</sup>: Changes tracked automatically across object-tree and emitted only on affected nodes.
-- **Flexible**: Make changes anywhere on the object tree. Have multiple object trees. etc.
-- **Change History**: State is tracked through `Change` objects, so you can record changes, replay them, etc.
-- **Interoprable**: Object-tree nodes (i.e. `State`s) are [`Observable`s](https://rxjs.dev/guide/observable) and [`Observer`s](https://rxjs.dev/guide/observer) at the same time, so full interop with anything working with observables and observers.
-- **Extensible**: Each `State` is connected to the rest of the object-tree by a downstream (`Observable<Change>`) and an upstream (`Observer<Change>`). Provide your own upstream/downstream, tap into them to monitor state changes, create state trees distributed across websockets, etc.
-- **Thin**: Minimal API surface, small code (and bundle) (min gzipped ~1.5KB, ~7.5KB with RxJS).
-- **Type-Safe**: `State`s have strong type inference and type-safety.
+<br><br>
 
-<br>
+### Example Usage
 
-**Example**:
+Create a state object:
 
 ```ts
 import { State } from 'rxdeep';
 
-// create a state object
 const state = new State([ { name: 'John' }, { name: 'Jack' }, { name: 'Jill' } ]);
+```
 
-// listen to changes on `'name'` property of index 1 on the list.
+<br>
+
+Listen to changes on `'name'` property of index 1 on the list:
+```ts
 state.sub(1).sub('name').subscribe(console.log);     // --> logs `Jack`
+```
 
-// You can modify the top-level state
+<br>
+
+You can modify the top-level state:
+```ts
 state.value = [ { name: 'Julia' }, ...state.value ]; // --> logs `John`, since `John` is index 1 now
+```
 
-// ... or mid-level states
+<br>
+
+... or mid-level states:
+```ts
 state.sub(1).value = { name: 'Josef' };              // --> logs `Josef`
+```
 
-// ... or another sub-state with the same address
+<br>
+
+... or another sub-state with the same address:
+```ts
 state.sub(1).sub('name').value = 'Jafet';            // --> logs `Jafet`
+```
 
-// Sub-states are observers as well, so go crazy
+<br>
+
+[RxJS](https://rxjs.dev) interop:
+```ts
 import { interval } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -51,6 +60,38 @@ interval(1000)
 .subscribe(state.sub(1));                            // --> logs `Jarvis #0`, `Jarvis #1`, `Jarvis #2`, ...
 ```
 
+<br>
+
+[Read More](https://loreanvictor.github.io/rxdeep/#quick-tour)
+
+<br><br>
+
+### UI Frameworks
+
+**RxDeep** is completely framework agnostic. It is also by no means limited to use on frontend (though that is understandably most common use-case).
+Due to it being based on [RxJS](https://rxjs.dev) and having high interop with it, you can easily use it anywhere that you can use RxJS.
+
+- <img src="https://reactjs.org/favicon.ico" width="16"/> [Use with React](https://loreanvictor.github.io/rxdeep/#react)
+- <img src="https://angular.io/assets/images/favicons/favicon.ico" width="16"/> [Use with Angular](https://loreanvictor.github.io/rxdeep/#angular)
+- <img src="https://vuejs.org/images/logo.png" width="16"/> [Use with Vue.js](https://loreanvictor.github.io/rxdeep/#vuejs)
+
+Because of its precise change emissions, using **RxDeep** in conjuction with popular UI frameworks should actually speed them up (since
+it results in less burden for the underlying change detection mechanisms of these frameworks).
+
+<br>
+
+[Read More](https://loreanvictor.github.io/rxdeep/#ui-frameworks)
+
+
+<br>
+
+### Precision
+
 ---
 
-**RxDeep** is still pretty early stage. DO NOT USE ON PRODUCTION, and email me (or open an issue) if you are interested, have questions, want to contribute, etc.
+[![Build Status](https://badgen.net/travis/loreanvictor/rxdeep?label=build&cache=300&icon=travis)](https://travis-ci.org/loreanvictor/rxdeep)
+[![Code Coverage](https://badgen.net/codecov/c/github/loreanvictor/rxdeep?cache=300&icon=codecov)](https://codecov.io/gh/loreanvictor/rxdeep)
+[![Minzipped Size](https://badgen.net/bundlephobia/minzip/rxdeep@latest?icon=jsdelivr&color=purple)](https://bundlephobia.com/result?p=rxdeep@latest)
+[![NPM Version](https://badgen.net/npm/v/rxdeep?cache=300&icon=npm)](https://www.npmjs.com/package/rxdeep)
+[![Code Quality](https://badgen.net/codacy/grade/423972f1e78b453e8e69581ba4abc058?cache=300&icon=codacy)](https://www.codacy.com/manual/loreanvictor/rxdeep)
+[![License](https://badgen.net/github/license/loreanvictor/rxdeep?icon=github)](LICENSE)
