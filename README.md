@@ -4,7 +4,7 @@
 npm i rxdeep
 ```
 
-**RxDeep** provides fast and (mostly) precise reactive state management, in a flexible and unopinionated manner. Make changes at any point on the state tree, and listen to changes on particular parts of your tree, with a precision emission system that ensures you only get values when something has truly changed[<sup>*</sup>](#precision).
+**RxDeep** provides fast and precise[<sup>*</sup>](#precision) reactive state management, in a flexible and unopinionated manner. Make changes at any point on the state tree, and listen to changes on particular parts of your tree, with a precision emission system that ensures you only get values when something has truly changed[<sup>*</sup>](#precision).
 
 [👉 Read the docs for more info.](https://loreanvictor.github.io/rxdeep/)
 
