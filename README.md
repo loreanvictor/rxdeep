@@ -80,9 +80,9 @@ it results in less burden for the underlying change detection mechanisms of thes
 ## Precision
 
 Precision means that `State`s (nodes on the state-tree) only emit values when there is a change to them (or when a change is directly issued
-to them or some other `State` representing the same address on the state-tree). **RxDeep** is as precise as it can get without sacrificing performance.
-This precision is sufficient for most common use-cases. However, if you need absolutely precise emissions on a particular use-case, 
-it allows you to trade-off performance for that extra precision.
+to a state or another state sharing the same state-tree address). **RxDeep** is as precise as it can get without sacrificing performance,
+which should be sufficient for most common use-cases. However, if you need absolutely precise emissions,
+**RxDeep** does allows you to trade-off performance for that extra precision.
 
 [👉 Learn more.](https://loreanvictor.github.io/rxdeep/docs/state#trace-less-changes)
 
