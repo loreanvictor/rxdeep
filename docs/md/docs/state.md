@@ -98,7 +98,7 @@ interval(1000).subscribe(a);
 
 ---
 
-## Change Immutability
+## Object Immutability
 
 **ALWAYS** make changes to the state that respect object immutability. You **MUST** always ensure that you are changing the 
 reference when changing the value of a `State`.
@@ -417,5 +417,8 @@ import { isEqual } from 'lodash'; // @see [lodash.isEqual()](https://lodash.com/
 
 const subState = state.sub(key, isEqual);
 ```
+
+> :Buttons
+> > :Button url=/docs/precision#redundancy, label=Learn More
 
 > :ToCPrevNext

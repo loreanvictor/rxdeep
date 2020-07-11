@@ -22,6 +22,18 @@ export const theme = /*#__PURE__*/createTheme({
       border: '#ffffff32'
     }
   },
+  formula: {
+    dark: {
+      background: '#241663',
+      text: '#ffffff',
+      highlight: '#ffffff16',
+    },
+    light: {
+      background: '#ffffff',
+      text: '#424242',
+      highlight: '#24166316',
+    }
+  },
   toc: {
     light: {
       background: '#ffffff',

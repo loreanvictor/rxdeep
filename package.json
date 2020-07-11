@@ -45,9 +45,11 @@
     "@babel/preset-env": "^7.10.4",
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@types/chai": "^4.2.11",
+    "@types/lodash": "^4.14.157",
     "@types/mocha": "^7.0.2",
     "@types/node": "^14.0.14",
     "chai": "^4.2.0",
+    "lodash": "^4.17.19",
     "mocha": "^8.0.1",
     "nyc": "^15.1.0",
     "rollup": "^2.18.2",
@@ -64,8 +66,15 @@
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
     "all": true,
-    "include": ["src/**/*.ts"],
-    "exclude": ["src/**/test/*"],
-    "reporter": ["text", "lcov"]
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "src/**/test/*"
+    ],
+    "reporter": [
+      "text",
+      "lcov"
+    ]
   }
 }

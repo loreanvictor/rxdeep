@@ -1,8 +1,9 @@
 > :Banner
 
 
-Fast and precise reactive state management, in a flexible and unopinionated manner. Make changes
-to any part of your state tree, track changes, subscribe to specific node/sub-tree, track changes by entity keys, etc.
+Fast and precise reactive state management for JavaScript / TypeScript, in a flexible and unopinionated manner. Make changes
+to any part of your state tree, track changes, subscribe to specific node/sub-tree, track changes by entity keys, verify changes,
+etc.
 
 ```bash
 npm i rxdeep
@@ -258,7 +259,7 @@ emissions. However, **RxDeep** does allow you to trade some performance for that
 use-case requires it.
 
 > :Buttons
-> > :Button label=Learn More, url=/docs/state#trace-less-changes
+> > :Button label=Learn More, url=/docs/precision
 
 <br>
 
@@ -289,7 +290,7 @@ state.value = { ...state.value, x: y } // --> CORRECT!
 ```
 
 > :Buttons
-> > :Button label=Learn More, url=/docs/state#change-immutability
+> > :Button label=Learn More, url=/docs/state#object-immutability
 
 <br>
 
@@ -361,16 +362,15 @@ v.sub(0).sub('val').value = 23; // --> change accepted and routed through the st
 
 ## Extensibility
 
-Each `State` is an [`Observable`](https://rxjs.dev/guide/observable) 
-and an [`Observer`](https://rxjs.dev/guide/observer) at the same time, 
-providing great inter-operability with [RxJS](https://rxjs.dev), its strong operators, and any
-tool working with observables.
+An **RxDeep** `State` is an [RxJS](https://rxjs.dev) [`Observable`](https://rxjs.dev/guide/observable) 
+and an [`Observer`](https://rxjs.dev/guide/observer), providing great interoperability with lots of existing tools.
 
-Additionally, each `State` is tied to the rest of the state tree via a downstream (`Observable<Change>`),
-from which the state receives changes from higher-up in the tree,
-and an upstream (`Observer<Change>`), to which the state reports changes occuring to it. The upstream
-and the downstream can be ANY observable/observer pair. This, for example, means you can easily create
-state trees distributed across a network, states trees remaining in sync with some REST API, etc.
+Additionally, each state basically relies on a downstream observable and an upstream observer for keeping track of changes
+and keeping data in sync. By providing custom downstream / upstreams, you can greatly extend **RxDeep** for use
+in any particular use case (for example you can easily distribute state-trees across a network).
+
+> :Buttons
+> > :Button url=/docs/state#under-the-hood, label=Learn More
 
 <br>
 

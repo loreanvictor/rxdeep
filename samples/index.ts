@@ -1,20 +1,17 @@
-import { State, Change } from '../src';
-import { Subject, interval } from 'rxjs';
-import { debounceTime, map } from 'rxjs/operators';
+import { State } from '../src';
+import { isEqual } from 'lodash';
 
-const echo = new Subject<Change<number>>();
-const state = new State(3,
-  echo.pipe(map(change => ({
-    ...change,
-    value: Math.min(change.value!!, 10),
-  }))),
-  echo
-);
+const s = new State({ x: { y: 2 }, z: 4});
+s.sub('x').subscribe(console.log);
+// s.sub('x').sub('y').subscribe(console.log);
+// s.value = {x : {y: 2}, z: 3};
+s.upstream.next({
+  from: 4, to: 3,
+  value: { z: 3, x: { y: 2 } },
+  trace: {
+    head: { sub: 'z' }
+  }
+});
+// s.value = { ...s.value, z: 3 };
 
-state.subscribe(console.log);
 
-state.value = 4;
-state.value = 12;
-state.value = 9;
-state.value++;
-state.value++;

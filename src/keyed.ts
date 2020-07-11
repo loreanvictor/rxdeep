@@ -93,7 +93,10 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
   }
 
   index(key: number | string) {
-    return this._changes.pipe(map(() => this._watcher.keymap[key].index));
+    return this._changes.pipe(
+      map(() => this._watcher.keymap[key].index),
+      startWith(this._watcher.keymap[key].index)
+    );
   }
 
   changes() {

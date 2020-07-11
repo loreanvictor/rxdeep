@@ -16,8 +16,8 @@ export interface BubbleOptions {
 const BubbleStyle = themedStyle<CodedocTheme>(theme => ({
   bubble: {
     position: 'absolute',
-    backdropFilter: 'blur(6px)',
-    WebkitBackdropFilter: 'blur(6px)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
     backfaceVisibility: 'hidden',
     WebkitBackfaceVisibility: 'hidden',
     bottom: 0,
