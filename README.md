@@ -4,7 +4,10 @@
 npm i rxdeep
 ```
 
-**RxDeep** provides fast and precise[<sup>*</sup>](#precision) reactive state management in JavaScript / TypeScript, in a flexible and unopinionated manner. Make changes at any point on the state tree, and listen to changes on particular parts of your tree, with a precision emission system that ensures you only get values when something has truly changed[<sup>*</sup>](#precision).
+**RxDeep** provides [fast](https://loreanvictor.github.io/rxdeep/docs/performance) and [precise](https://loreanvictor.github.io/rxdeep/docs/precision) 
+reactive state management in JavaScript / TypeScript, in a flexible and unopinionated manner. 
+Make changes at any point on the state tree, and listen to changes on particular parts of your tree, 
+with a precision emission system that ensures you only get values when something has truly changed.
 
 [👉 Read the docs for more info.](https://loreanvictor.github.io/rxdeep/)
 
@@ -74,17 +77,6 @@ Because of its precise change emissions, using **RxDeep** in conjuction with pop
 it results in less burden for the underlying change detection mechanisms of these frameworks).
 
 [👉 Learn more.](https://loreanvictor.github.io/rxdeep/#ui-frameworks)
-
-<br><br>
-
-## Precision
-
-Precision means that `State`s (nodes on the state-tree) only emit values when there is a change to them (or when a change is directly issued
-to a state or another state sharing the same state-tree address). **RxDeep** is as precise as it can get without sacrificing performance,
-which should be sufficient for most common use-cases. However, if you need absolutely precise emissions,
-**RxDeep** does allows you to trade-off performance for that extra precision.
-
-[👉 Learn more.](https://loreanvictor.github.io/rxdeep/docs/state#trace-less-changes)
 
 <br><br>
 
