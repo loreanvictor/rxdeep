@@ -15,5 +15,5 @@ export function postTrace<T>() {
       }
     }
     return change;
-  })
+  });
 }

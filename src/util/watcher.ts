@@ -28,12 +28,13 @@ export class Watcher<T> {
       if (!(_key in keymap)) changes.deletions.push(entry);
       else {
         const _newEntry = keymap[_key];
-        if (_newEntry.index !== entry.index) 
+        if (_newEntry.index !== entry.index) {
           changes.moves.push({
             oldIndex: entry.index,
             newIndex: _newEntry.index,
             item: entry.item
           });
+        }
       }
     });
 
