@@ -66,8 +66,10 @@ describe('KeyedState', () => {
     const s = new State([1, 2, 3, 4], new Subject<Change<number[]>>(), {
       next: v => {
         expect(v.value).to.eql([4, 3, 2, 1]);
-        expect(v.from).to.eql([1, 2, 3, 4]);
-        expect(v.to).to.eql([4, 3, 2, 1]);
+        expect(v.trace).to.eql({
+          from: [1, 2, 3, 4],
+          to: [4, 3, 2, 1]
+        })
         done();
       },
       error: () => {},

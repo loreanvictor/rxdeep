@@ -1,29 +1,47 @@
-import { Change } from './types';
+import { Change, isLeaf, ChangeTrace } from './types';
+
+
+function clean<T>(l: T[]) {
+  if (l[l.length - 1] === undefined) {
+    l.length--;
+    clean(l);
+  }
+}
 
 
 export function reverse<T>(change: Change<T>): Change<T> {
-  if (!change.trace) {
+  if (isLeaf(change.trace)) {
     return {
-      value: change.from, from: change.to, to: change.from
+      value: change.trace!!.from,
+      trace: {
+        from: change.trace!!.to,
+        to: change.trace!!.from,
+      }
     }
   } else {
-    const subreversed = reverse({
-      from: change.from, to: change.to,
-      value: change.value ? change.value[change.trace.head.sub] : undefined,
-      trace: change.trace.rest
-    });
+    const revalue = Array.isArray(change.value) ? [...change.value] : {...change.value };
 
-    const value: T | undefined = change.value ? (
-      Array.isArray(change.value) ? [...change.value] as any as T : {...change.value}
-    ) : undefined;
+    const retrace: ChangeTrace<T> = {
+      subs: {}
+    };
 
-    if (value)
-      value[change.trace.head.sub] = subreversed.value!!;
+    for (let key in change.trace.subs) {
+      const reversed = reverse({
+        value: change.value ? (change.value as any)[key] : undefined,
+        trace: (change.trace.subs as any)[key],
+      })!!;
+
+      (revalue as any)[key] = reversed.value;
+      (retrace.subs as any)[key] = reversed.trace;
+    }
+
+    if (Array.isArray(revalue)) {
+      clean(revalue);
+    }
 
     return {
-      value,
-      from: subreversed.from, to: subreversed.to,
-      trace: change.trace
+      value: revalue as T,
+      trace: retrace,
     }
   }
 }

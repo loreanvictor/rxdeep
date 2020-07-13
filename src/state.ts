@@ -1,7 +1,8 @@
 import { Observable, Observer, Subject } from 'rxjs';
 import { filter, map, tap, multicast, refCount } from 'rxjs/operators';
 
-import { Change, EqualityCheck, ChangeTraceRest } from './types';
+import { Change, isLeaf, ChangeTraceNode } from './types';
+import { postTrace } from './util/post-trace';
 
 
 export class State<T> extends Observable<T | undefined> implements Observer<T | undefined> {
@@ -24,6 +25,7 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
     this._value = initial;
     this._changesub = new Subject<Change<T>>();
     this.downstream = downstream.pipe(
+      postTrace<T>(),
       tap(change => {
         if (change.value !== this._value) this._value = change.value;
       }),
@@ -33,53 +35,53 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
     this.upstream = upstream || downstream as any as Observer<Change<T>>;
   }
 
-  next(t: T | undefined) { this.upstream.next({ value: t, from: this.value, to: t }); }
+  next(t: T | undefined) { this.upstream.next({ value: t, trace: { from: this.value, to: t } }); }
   error(err: any) { this.upstream.error(err); }
   complete() { this.upstream.complete(); this._changesub.complete(); }
 
-  get value() { return this._value as any; }
+  get value() { return this._value!!; }
   set value(t: T) { this.next(t); }
 
-  sub<K extends keyof T>(key: K, isEqual: EqualityCheck<T[K]> = (a, b) => a === b) {
+  sub<K extends keyof T>(key: K) {
     const _sub: State<T[K]> = new State(
-      this.value ? this.value[key] : undefined,                   // --> initial value,
-      this.subDownstream(key, v => !isEqual(v, _sub.value)),
+      this.value ? this.value[key] : undefined,
+      this.subDownstream(key, () => _sub.value),
       this.subUpstream(key),
     );
 
     return _sub;
   }
 
-  subDownstream<K extends keyof T>(key: K, hasChanged: (v: T[K] | undefined) => boolean) {
-    return this.downstream.pipe(                                // --> for changes reported from above
+  subDownstream<K extends keyof T>(key: K, current: () => T[K] | undefined) {
+    return this.downstream.pipe(
       map(change => ({
-        trace: change.trace, from: change.from, to: change.to,
-        value: change.value ? change.value[key] : undefined     // --> extract change's value for equality check
+        value: change.value ? change.value[key] : undefined,
+        trace: change.trace,
       })),
-      filter(
-        change => change.trace?.head?.sub === key               // --> check if change's address matches sub key
-        || (
-          !change.trace?.head                                   // --> or change is not targeted any more
-          && hasChanged(change.value)                           // --> and value has changed
-        )
-      ),
-      map(change => ({ 
-        value: change.value, from: change.from, to: change.to,
-        trace: change.trace?.rest                               // --> pass down rest of the trace
+      filter(change => {
+        if (isLeaf(change.trace)) {
+          return current() != change.value;
+        } else {
+          return key in change.trace.subs;
+        }
+      }),
+      map(change => ({
+        value: change.value,
+        trace: isLeaf(change.trace)?undefined:((change.trace as ChangeTraceNode<T>).subs as any)[key]
       }))
     )
   }
 
   subUpstream<K extends keyof T>(key: K): Observer<Change<T[K]>> {
     return {
-      next: change => {                                          // --> for changes coming from the sub
-        this.value[key] = change.value!!;                        // --> update latest value
+      next: change => {
+        this.value[key] = change.value!!;
         this.upstream.next({
           value: this.value,
-          from: change.from, to: change.to,
           trace: {
-            head: { sub: key },                                   // --> add sub key as trace head
-            rest: change.trace as ChangeTraceRest<T>
+            subs: {
+              [key]: change.trace
+            } as any
           }
         });
       },

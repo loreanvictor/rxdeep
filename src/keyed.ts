@@ -1,16 +1,17 @@
 import { Observable, Observer, Subject } from 'rxjs';
-import { map, filter, multicast, refCount, startWith } from 'rxjs/operators';
+import { map, filter, multicast, refCount, startWith, tap } from 'rxjs/operators';
 
 import { State } from './state';
-import { KeyFunc, ListChanges, Change, EqualityCheck } from './types';
+import { KeyFunc, ListChanges, Change, isLeaf, ChangeTraceNode, ChangeTrace } from './types';
 import { Watcher } from './util/watcher';
+import { trace } from './trace';
 
 
 export class KeyedState<T> extends Observable<T[] | undefined> implements Observer<T[] | undefined> {
   private _changes: Observable<[Change<T[]>, ListChanges<T>]>;
   private _changesub: Subject<[Change<T[]>, ListChanges<T>]>;
   private _watcher: Watcher<T>;
-  private _traceKey: string;
+  private _value: T[] = [];
 
   constructor(
     readonly state: State<T[]>,
@@ -20,55 +21,76 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
       return this._changes.pipe(map(([change, _]) => change.value), startWith(this.value)).subscribe(observer);
     });
 
-    this._traceKey = Math.random().toString(36).substring(2, 15)
-                    + Math.random().toString(36).substring(2, 15);
     this._watcher = new Watcher(state.value, keyfunc);
+    this._value = state.value;
     this._changesub = new Subject<[Change<T[]>, ListChanges<T>]>();
     this._changes = this.state.downstream.pipe(
       map(change => [change, this._watcher.changes(change.value)] as [Change<T[]>, ListChanges<T>]),
+      map(([change, listChanges]) => {
+        if (listChanges.moves.length > 0 && !isLeaf(change.trace)) {
+          const mapping = listChanges.moves.reduce((total, move) => {
+            total[move.oldIndex] = move.newIndex;
+            return total;
+          }, <{[src: number]: number}>{});
+          const _tr: ChangeTrace<T[]> = {subs:  { ... change.trace.subs } };
+          Object.entries(mapping).forEach(([src, dest]) => {
+            const subtrace = trace(this._value[src as any], change.value!![dest]);
+            if (subtrace)
+              (_tr.subs as any)[dest] = subtrace;
+            else
+              delete (_tr.subs as any)[dest];
+          });
+          return [{
+            value: change.value,
+            trace: _tr
+          }, listChanges] as [Change<T[]>, ListChanges<T>];
+        }
+        return [change, listChanges] as [Change<T[]>, ListChanges<T>];
+      }),
+      tap(([change]) => {
+        this._value = change.value || [];
+      }),
       multicast(() => this._changesub),
       refCount(),
     );
   }
 
   next(t: T[] | undefined) {
-    this.state.upstream.next({ value: t, from: this.value, to: t });
+    this.state.upstream.next({ value: t, trace: { from: this.value, to: t } });
   }
 
   error(err: any) { this.state.upstream.error(err); }
   complete() { this._changesub.complete(); }
 
-  get value() { return this._watcher.last; }
+  get value() { return this._value; }
   set value(t: T[]) { this.next(t); }
 
-  key(key: number | string, isEqual: EqualityCheck<T> = (a, b) => a === b) {
+  key(key: number | string) {
     const sub: State<T> = new State(
       this._watcher.keymap[key]?.item,
-      this.keyDownstream(key, v => !isEqual(v, sub.value)),
+      this.keyDownstream(key, () => sub.value),
       this.keyUpstream(key),
     );
 
     return sub;
   }
 
-  keyDownstream(key: number | string, hasChanged: (t: T) => boolean) {
+  keyDownstream(key: number | string, current: () => T | undefined) {
     return this._changes.pipe(
-      map(([change, _]) => ({ 
-        trace: change.trace, from: change.from, to: change.to,
+      map(([change, _]) => ({
+        trace: change.trace,
         entry: this._watcher.keymap[key],
       })),
-      filter(change =>
-        change.trace?.head?.keys?.[this._traceKey] === key
-        || change.trace?.head?.sub === change.entry.index
-        || (
-          !change.trace?.head
-          && hasChanged(change.entry.item)
-        )
-      ),
+      filter(change => {
+        if (isLeaf(change.trace)) {
+          return current() != change.entry.item;
+        } else {
+          return change.entry.index in change.trace.subs;
+        }
+      }),
       map(change => ({
         value: change.entry.item,
-        from: change.from, to: change.to,
-        trace: change.trace?.rest
+        trace: isLeaf(change.trace)?undefined:((change.trace as ChangeTraceNode<T>).subs as any)[change.entry.index]
       }))
     );
   }
@@ -77,13 +99,13 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
     return {
       next: change => {
         const entry = this._watcher.keymap[key];
-        this._watcher.last[entry.index] = change.value!!;
+        this._value[entry.index] = change.value!!;
         this.state.upstream.next({
-          value: this._watcher.last,
-          from: change.from, to: change.to,
+          value: this._value,
           trace: {
-            head: { sub: entry.index, keys: { [this._traceKey]: key }},
-            rest: change.trace,
+            subs: {
+              [entry.index]: change.trace
+            }
           }
         });
       },
