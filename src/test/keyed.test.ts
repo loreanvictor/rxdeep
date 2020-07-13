@@ -17,6 +17,25 @@ describe('KeyedState', () => {
     });
   });
 
+  it('should default to empty array when initialized with undefined state.', done => {
+    const s = new State([]);
+    const k = new KeyedState(s.sub('' as any) as any, n => n as any);
+    k.subscribe(v => {
+      expect(v).to.eql([]);
+      done();
+    });
+  });
+
+  it('should also revert to empty array when proxy value changes to undefined.', () => {
+    const r: any[] = [];
+    const s = new State([1, 2, 3, 4]);
+    const k = new KeyedState(s, n => n);
+    k.subscribe(v => r.push(v));
+    s.value = undefined as any;
+    expect(k.value).to.eql([]);
+    r.should.eql([[1, 2, 3, 4], []]);
+  });
+
   it('should emit the proper initial value.', done => {
     const s = new State([1, 2, 3, 4, 5]);
     const k = new KeyedState(s, n => n);
@@ -108,6 +127,56 @@ describe('KeyedState', () => {
       s.sub(0).sub('name').value = 'Judy';
       r.length.should.equal(2);
       r.should.eql(['Jill', 'Judy']);
+    });
+
+    it('should properly track batch changes of array.', () => {
+      const r: any[] = [];
+      const r2: any[] = [];
+
+      const s = new State({
+        people: [{id: 101, name: 'John'}, {id: 102, name: 'Jill'}]
+      });
+      const k = new KeyedState(s.sub('people'), p => p.id);
+
+      k.key(101).subscribe(v => r.push(v));
+      k.key(102).subscribe(v => r2.push(v));
+
+      s.value = {
+        people: [{id: 102, name: 'Judy'}, {id: 101, name: 'John'}]
+      };
+
+      k.value = [{id: 101, name: 'Jack'}];
+      s.sub('people').value = [{id: 103, name: 'Jin'}, {id: 101, name: 'Jack'}]
+
+      r.should.eql([
+        {id: 101, name: 'John'},
+        {id: 101, name: 'Jack'}
+      ]);
+      r2.should.eql([
+        {id: 102, name: 'Jill'},
+        {id: 102, name: 'Judy'},
+        undefined
+      ]);
+    });
+
+    it('should return proper initial value for undefined keys.', () => {
+      const r: any[] = [];
+      const s = new State([43]);
+      const k = new KeyedState(s, n => n);
+      k.key(42).subscribe(i => r.push(i));
+      k.value = [43, 45];
+      k.value = [43, 42];
+      r.should.eql([undefined, 42]);
+    });
+
+    it('should return proper initial value for removed keys.', done => {
+      const s = new State([43, 42]);
+      const k = new KeyedState(s, n => n);
+      k.subscribe(); k.value = [43];
+      k.key(42).subscribe(v => {
+        expect(v).to.be.undefined;
+        done();
+      });
     });
 
     it('should route all changes related to specified key to the state.', () => {
@@ -221,6 +290,24 @@ describe('KeyedState', () => {
       k.index(42).subscribe(i => r.push(i));
       s.value = [43, 42];
       r.should.eql([0, 1]);
+    });
+
+    it('should return undefined when a key is removed.', () => {
+      const r: any[] = [];
+      const s = new State([42, 43]);
+      const k = new KeyedState(s, n => n);
+      k.index(42).subscribe(i => r.push(i));
+      s.value = [43];
+      r.should.eql([0, undefined]);
+    });
+
+    it('should return undefined when a key is not yet defined.', () => {
+      const r: any[] = [];
+      const s = new State([43]);
+      const k = new KeyedState(s, n => n);
+      k.index(42).subscribe(i => r.push(i));
+      s.value = [43, 42];
+      r.should.eql([undefined, 1]);
     });
   });
 

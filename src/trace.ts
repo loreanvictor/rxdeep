@@ -27,11 +27,8 @@ export function trace<T>(src: T, dest: T): ChangeTrace<T> | undefined {
 
     for (let key in dest) {
       if (seen.has(key)) continue;
-      const subTrace = trace(src[key], dest[key]);
-      if (subTrace) {
-        (tr.subs as any)[key] = subTrace;
-        changed = true;
-      }
+      (tr.subs as any)[key] = trace(src[key], dest[key]);
+      changed = true;
     }
 
     if (changed)
@@ -43,6 +40,7 @@ export function trace<T>(src: T, dest: T): ChangeTrace<T> | undefined {
     return { from: src, to: dest };
   }
 
+  /* istanbul ignore next */
   if (src !== dest) {
     return { from: src, to: dest };
   }

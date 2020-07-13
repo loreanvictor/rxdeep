@@ -18,11 +18,11 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
     readonly keyfunc: KeyFunc<T>,
   ) {
     super((observer: Observer<T[] | undefined>) => {
-      return this._changes.pipe(map(([change, _]) => change.value), startWith(this.value)).subscribe(observer);
+      return this._changes.pipe(map(([change, _]) => change.value || []), startWith(this.value)).subscribe(observer);
     });
 
     this._watcher = new Watcher(state.value, keyfunc);
-    this._value = state.value;
+    this._value = state.value || [];
     this._changesub = new Subject<[Change<T[]>, ListChanges<T>]>();
     this._changes = this.state.downstream.pipe(
       map(change => [change, this._watcher.changes(change.value)] as [Change<T[]>, ListChanges<T>]),
@@ -82,15 +82,19 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
         entry: this._watcher.keymap[key],
       })),
       filter(change => {
+        /* istanbul ignore next */
         if (isLeaf(change.trace)) {
           return current() != change.entry.item;
         } else {
-          return change.entry.index in change.trace.subs;
+          return (!change.entry && !!current())
+          || (change.entry && change.entry.index in change.trace.subs);
         }
       }),
       map(change => ({
-        value: change.entry.item,
-        trace: isLeaf(change.trace)?undefined:((change.trace as ChangeTraceNode<T>).subs as any)[change.entry.index]
+        value: change.entry?.item,
+        trace: isLeaf(change.trace) || !change.entry?
+               undefined:
+               ((change.trace as ChangeTraceNode<T>).subs as any)[change.entry.index]
       }))
     );
   }
@@ -116,8 +120,8 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
 
   index(key: number | string) {
     return this._changes.pipe(
-      map(() => this._watcher.keymap[key].index),
-      startWith(this._watcher.keymap[key].index)
+      map(() => this._watcher.keymap[key]?.index),
+      startWith(this._watcher.keymap[key]?.index)
     );
   }
 

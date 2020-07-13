@@ -3,7 +3,6 @@ import { KeyFunc, KeyMap, ListChanges } from '../types';
 
 export class Watcher<T> {
   private _keymap: KeyMap<T>;
-  // private _last: T[];
 
   constructor(initial: T[] | undefined, readonly keyFunc: KeyFunc<T>) {
     this._keymap = {};
