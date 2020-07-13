@@ -1,6 +1,7 @@
-import { State, trace } from '../src';
+import { State, KeyedState } from '../src';
 
-const s = new State([1, 2, 3, 4]);
-s.sub(4).subscribe(console.log);
-s.value = [1, 3, 3, 4, 5];
+const state = new State([{ id: 101, name: 'Jill' }, { id: 102, name: 'Jack' }]);
+
+state.downstream.subscribe(console.log);    // --> Log changes
+state.sub(1).sub('name').value = 'Dude';
 

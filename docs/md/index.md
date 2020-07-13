@@ -48,7 +48,7 @@ state.sub(1).sub('name').value = 'Jafet';            // --> logs `Jafet`
 
 <br>
 
-Verify changes to the state:
+[Verify changes](/docs/verified-state) to the state:
 
 ```ts
 import { State, VerifiedState } from 'rxdeep';
@@ -90,7 +90,7 @@ state.sub(1).pipe(debounceTime(1000)).subscribe(console.log); // --> debounces c
 
 <br>
 
-Track `keys` instead of indexes:
+[Track `keys` instead of indexes](/docs/keyed-state):
 
 ```ts
 import { State, KeyedState } from 'rxdeep';
@@ -249,14 +249,13 @@ if said functions aren't fast enough.
 
 ## Precision
 
-**RxDeep** enables subscribing to a particular sub-state of the state tree. These sub-states (mostly) only
-emit values when the value of the sub-state has changed (or a change is issued on same tree address).
-So you could subscribe heavy-weight operations (such as DOM re-rendering)
+**RxDeep** enables subscribing to a particular sub-state of the state tree. These sub-states only
+emit values when the value of the sub-state has changed, or when there is a change issued directly
+to them, a state with the same address, or one of their descendants. 
+
+This means you could subscribe heavy-weight operations (such as DOM re-rendering)
 on sub-states.
 
-For performance reasons, **RxDeep**'s precision is not 100%, and in corner cases you might get redundant
-emissions. However, **RxDeep** does allow you to trade some performance for that added precision, if your particular
-use-case requires it.
 
 > :Buttons
 > > :Button label=Learn More, url=/docs/precision
@@ -269,7 +268,9 @@ use-case requires it.
 through specific channels. You can freely issue changes to any part of the state-tree, so for example you can only
 expose relevant parts of the state-tree to modules/components.
 
-The only limitation (similar to [Redux](https://redux.js.org/)) is that you need to respect object immutability.
+The only limitations (similar to [Redux](https://redux.js.org/)) are that you need to 
+keep state as plain JavaScript objects (`number | string | boolean | undefined | Date`, or arrays and plain objects
+of these values), and respect object immutability.
 Basically do not change an object without changing its reference.
 
 <br>
@@ -307,10 +308,14 @@ state.sub(1).sub('name').value = 'Dude';
 { 
   value: [{...}, { name: 'Dude', ... }, ...],
   trace: {
-    head: { sub: 1 },
-    rest: { head: { sub: 'name' } }
-  },
-  from: ..., to: 'Dude'
+    subs: {
+      1: {
+        subs: {
+          name: { from: ..., to: 'Dude' }
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -343,6 +348,9 @@ state.value = [
 }
 ```
 
+> :Buttons
+> > :Button label=Learn More, url=/docs/change
+
 <br>
 
 ## Change Verification
@@ -357,6 +365,9 @@ const v = new VerifiedState(s, change => change.value.reduce((t, i) => t + i.val
 v.sub(0).sub('val').value = 22; // --> change denied, local changes automatically reverted
 v.sub(0).sub('val').value = 23; // --> change accepted and routed through the state-tree
 ```
+
+> :Buttons
+> > :Button label=Learn More, url=/docs/verified-state
 
 <br>
 
@@ -376,10 +387,12 @@ in any particular use case (for example you can easily distribute state-trees ac
 
 ## Thin and Type Safe
 
-**RxDeep** includes minimal surface area, focusing only on
-effectively tracking and propagating changes across a reactive state tree. Its bundle size is roughly `~1.5KB`,
-not including dependencies. Including dependencies (which is [RxJS](https://rxjs.dev), and hence most probably
-already included in your bundle), it would be `~7.5KB`.
+**RxDeep** has a bundle size of under `8Kb`, which includes its only dependency [RxJS](https://rxjs.dev) (tree-shaken).
+Since [RxJS](https://rxjs.dev) is already included in lots of frontend bundles, contribution of **RxDeep** to your
+bundle size will most probably be under `2Kb` (which is the raw library without dependencies).
+
+This small size is due to extremely thin API surface of the library, focusing only on providing deep state management
+and minor utilities for that. This in turn makes **RxDeep** pretty easy to learn.
 
 **RxDeep** is written in [TypeScript](https://www.typescriptlang.org/) with detailed type annotations, 
 which should greatly improve development experience even if you use it in JavaScript (error highlighting, autocompletes, etc).
