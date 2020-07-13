@@ -35,10 +35,12 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
           const _tr: ChangeTrace<T[]> = {subs:  { ... change.trace.subs } };
           Object.entries(mapping).forEach(([src, dest]) => {
             const subtrace = trace(this._value[src as any], change.value!![dest]);
-            if (subtrace)
+            if (subtrace) {
               (_tr.subs as any)[dest] = subtrace;
-            else
+            }
+            else {
               delete (_tr.subs as any)[dest];
+            }
           });
           return [{
             value: change.value,
@@ -84,7 +86,7 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
       filter(change => {
         /* istanbul ignore next */
         if (isLeaf(change.trace)) {
-          return current() != change.entry.item;
+          return current() !== change.entry.item;
         } else {
           return (!change.entry && !!current())
           || (change.entry && change.entry.index in change.trace.subs);
@@ -115,7 +117,7 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
       },
       error: err => this.state.upstream.error(err),
       complete: () => {},
-    }
+    };
   }
 
   index(key: number | string) {

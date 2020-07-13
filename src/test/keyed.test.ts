@@ -88,7 +88,7 @@ describe('KeyedState', () => {
         expect(v.trace).to.eql({
           from: [1, 2, 3, 4],
           to: [4, 3, 2, 1]
-        })
+        });
         done();
       },
       error: () => {},
@@ -146,7 +146,7 @@ describe('KeyedState', () => {
       };
 
       k.value = [{id: 101, name: 'Jack'}];
-      s.sub('people').value = [{id: 103, name: 'Jin'}, {id: 101, name: 'Jack'}]
+      s.sub('people').value = [{id: 103, name: 'Jin'}, {id: 101, name: 'Jack'}];
 
       r.should.eql([
         {id: 101, name: 'John'},

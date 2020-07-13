@@ -9,7 +9,9 @@ function isRaw(v: any) {
 
 
 export function trace<T>(src: T, dest: T): ChangeTrace<T> | undefined {
-  if (src === dest) return undefined;
+  if (src === dest) {
+    return undefined;
+  }
 
   if (!isRaw(src) && !isRaw(dest)) {
     const tr: ChangeTrace<T> = { subs: { } };
@@ -26,14 +28,20 @@ export function trace<T>(src: T, dest: T): ChangeTrace<T> | undefined {
     }
 
     for (let key in dest) {
-      if (seen.has(key)) continue;
+      if (seen.has(key)) {
+        continue;
+      }
+
       (tr.subs as any)[key] = trace(src[key], dest[key]);
       changed = true;
     }
 
-    if (changed)
+    if (changed) {
       return tr;
-    else return undefined;
+    }
+    else {
+      return undefined;
+    }
   }
 
   if (src instanceof Date && dest instanceof Date && +src !== +dest) {
@@ -49,7 +57,9 @@ export function trace<T>(src: T, dest: T): ChangeTrace<T> | undefined {
 
 export function change<T>(src: T, dest: T): Change<T> | undefined {
   const _trace = trace(src, dest);
-  if (_trace) return {
-    value: dest, trace: _trace
-  };
+  if (_trace) {
+    return {
+      value: dest, trace: _trace
+    };
+  }
 }

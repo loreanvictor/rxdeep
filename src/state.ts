@@ -27,7 +27,9 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
     this.downstream = downstream.pipe(
       postTrace<T>(),
       tap(change => {
-        if (change.value !== this._value) this._value = change.value;
+        if (change.value !== this._value) {
+          this._value = change.value;
+        }
       }),
       multicast(() => this._changesub),
       refCount(),
@@ -60,7 +62,7 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
       })),
       filter(change => {
         if (isLeaf(change.trace)) {
-          return current() != change.value;
+          return current() !== change.value;
         } else {
           return key in change.trace.subs;
         }

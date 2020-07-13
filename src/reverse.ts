@@ -17,7 +17,7 @@ export function reverse<T>(change: Change<T>): Change<T> {
         from: change.trace!!.to,
         to: change.trace!!.from,
       }
-    }
+    };
   } else {
     const revalue = Array.isArray(change.value) ? [...change.value] : {...change.value };
 
@@ -42,6 +42,6 @@ export function reverse<T>(change: Change<T>): Change<T> {
     return {
       value: revalue as T,
       trace: retrace,
-    }
+    };
   }
 }

@@ -223,7 +223,7 @@ describe('State', () => {
       {x: [1, 2, 3, 4], y: true},
       {x: [1, 2, 3, 4, 5], y: false},
       {x: [2, 3, 4, 5], y: false}
-    ])
+    ]);
   });
 
   describe('.sub()', () => {
