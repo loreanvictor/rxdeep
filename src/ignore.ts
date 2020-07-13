@@ -6,5 +6,5 @@ export function ignore() {
     next: () => {},
     error: () => {},
     complete: () => {},
-  }
+  };
 }

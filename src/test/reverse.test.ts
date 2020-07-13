@@ -1,63 +1,82 @@
 import { should, expect } from 'chai'; should();
 
 import { reverse } from '../reverse';
-import { Change } from '../types';
+import { change } from '../trace';
 
 
 describe('reverse()', () => {
-  it('should properly reverse a change.', () => {
-    const o = { value: 42, from: 43, to: 42 };
-    const r = reverse(o);
-    expect(r.value).to.equal(43);
-    expect(r.from).to.equal(42);
-    expect(r.to).to.equal(43);
-    reverse(r).should.eql(o);
+  it('should properly reverse a leaf change.', () => {
+    const r = reverse({value: 43, trace: { from: 42, to: 43 }});
+    expect(r.value).to.eql(42);
+    expect(r.trace).to.eql({ from: 43, to: 42 });
   });
 
-  it('should properly reverse a deep change.', () => {
-    const o = {
-      value: [42, 44],
-      trace: { head: { sub: 0 }},
-      from: 43,
-      to: 42,
-    }
-    const r = reverse(o);
-
-    expect(r.value).to.eql([43, 44]);
-    expect(r.trace?.head?.sub).to.equal(0);
-    expect(r.from).to.equal(42);
-    expect(r.to).to.equal(43);
-    reverse(r).should.eql(o);
+  it('should properly reverse a node change.', () => {
+    const r = reverse(change({ x: 42 }, { x : 43 })!!);
+    expect(r.value).to.eql({ x: 42 });
+    expect(r.trace).to.eql({
+      subs: {
+        x: { from: 43, to: 42 }
+      }
+    });
   });
 
-  it('should properly reverse a deep-deep change.', () => {
-    const o = {
-      value: [{ x: 42 }, { x: 44 }],
-      trace: { head: { sub: 0 }, rest: { head: { sub: 'x' as keyof {x: number} } } },
-      from: 43,
-      to: 42,
-    }
-    const r = reverse(o);
+  it('should properly reverse a really deep change.', () => {
+    const r = reverse(change({
+      x: 21,
+      l: [1, 2, {x: 5}],
+    }, {
+      x: 22,
+      l: [1, 2, {x: 6}, 23],
+    })!!);
 
-    expect(r.value).to.eql([{x : 43 }, { x: 44 }]);
-    expect(r.trace?.head.sub).to.equal(0);
-    expect(r.trace?.rest?.head.sub).to.equal('x');
-    reverse(r).should.eql(o);
+    expect(r.value).to.eql({
+      x: 21,
+      l: [1, 2, {x: 5}]
+    });
+    expect(r.trace).to.eql({
+      subs: {
+        x: { from: 22, to: 21 },
+        l: {
+          subs: {
+            2: {
+              subs: {
+                x: { from: 6, to: 5 }
+              }
+            },
+            3: { from: 23, to: undefined }
+          }
+        }
+      }
+    });
   });
 
-  it('should properly handle undefined change values.', () => {
-    const o: Change<{x : number}[]> = {
+  it('should properly handle collapsing objects to undefined.', () => {
+    const r = reverse({
       value: undefined,
-      trace: { head: { sub: 0 }, rest: { head: { sub: 'x' } } },
-      from: 43,
-      to: 42
-    };
-    const r = reverse(o);
+      trace: {
+        subs: {
+          x: { from: 3, to: undefined }
+        }
+      }
+    });
+    expect(r.value).to.eql({x : 3});
+    expect(r.trace).to.eql({
+      subs: {
+        x: { from: undefined, to: 3 }
+      }
+    });
+  });
 
-    expect(r.value).to.be.undefined;
-    expect(r.from).to.equal(42);
-    expect(r.to).to.equal(43);
-    expect(r.trace).to.eql(o.trace);
-    reverse(r).should.eql(o);
+  it('should cancel itself out.', () => {
+    const c = change({
+      x: 21,
+      l: [1, 2, {x: 5}, 23],
+    }, {
+      x: 22,
+      l: [1, 2, {x: 6}],
+    });
+
+    reverse(reverse(c!!)).should.eql(c);
   });
 });

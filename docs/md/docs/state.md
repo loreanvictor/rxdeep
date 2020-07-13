@@ -273,6 +273,23 @@ team.sub('name').value = 'That Other Team';
 
 ---
 
+## Value Types
+
+**RxDeep** requires the state-tree to be represented by plain JavaScript objects, i.e.
+numbers, booleans, strings, `Date` objects, `undefined`, `null`, or arrays / objects
+of other plain JavaScript objects, without any circular references:
+
+```ts
+type PlainJavaScriptObject = null | undefined | number | string | boolean | Date
+                            | PlainJavaScriptObject[]
+                            | {[key: string]: PlainJavaScriptObject}
+```
+
+This is essential since otherwise **RxDeep** is unable to perform [post-tracing](/docs/performance#change-in-arbitrary-nodes)
+on changed objects.
+
+---
+
 ## Change History
 
 You can subscribe to `.downstream` property of a `State` to listen for changes occuring to it
@@ -285,33 +302,21 @@ team.sub('people').sub(0).sub('name').value = 'Jackie';
 // Logs:
 // > {
 // >   value: [ { id: 101, name: 'Jackie', id: 102, name: 'Jeremy' } ],
-// >   from: 'Julia',
-// >   to: 'Jackie',
-// >   trace: { head: { sub: 0 } }, rest: { head: { sub: 'name' }, rest: undefined }
+// >   trace: {
+// >     subs: {
+// >       people: {
+// >         subs: {
+// >           0: {
+// >             subs: {
+// >               name: { from: 'Jeremy', to: 'Jackie' }
+// >             }
+// >           }
+// >         }
+// >       }
+// >     }
+// >   }
 // > }
 ```
-
-<br>
-
-Each change object has the following properties:
-
-```ts
-type Change<T> = {
-  value: T | undefined;           // --> value of current state if change was applied to it
-  from: any;                      // --> the original value of the original state issuing the change
-  to: any;                        // --> the updated value of the original state issuing the change
-  trace?: ChangeTrace<T>;         // --> the trace of the change
-}
-
-type ChangeTrace<T> = {
-  head: {                         // --> determines which sub-state the change bubbled up from
-    sub: keyof T;                 // --> the sub-key of the sub-state
-    ...
-  },
-  rest?: ChangeTrace<T>            // --> potentially the rest of the change trace
-}
-```
-
 > :Buttons
 > > :Button label=Read More About Changes, url=/docs/change
 
@@ -397,28 +402,21 @@ it accordingly, removing the head of the change trace in the process.
 
 <br>
 
-### Trace-less Changes
+### Post-Tracing
 
-It can happen that a received change lacks any trace. This is because the change was issued on the same
-or lower depth of the state-tree. In such a case, the `State` cannot use the trace to determine which
-sub-states should receive the change.
+When a change is issued to a non-leaf node, the change trace that is collected is up to that particular point of the
+state-tree, and not further down. As a result, a `State` does not know how to down propagate this change to its
+sub-states.
 
-In this situation, the parent state would rely on equality checks to see if a particular change would
-affect a particular sub-state. By default, the `===` operator is used. This is pretty fast and works
-fine for most leaf-states (which typically have raw values). However, this might result in redundant emissions
-by states whose value type is not raw (and hence `===` returns `false` despite the two objects being essentially the same).
-
-If you need further emission precision on these cases as well, you can simply provide your own equality check
-to `.sub()` method. Note that this will most probably incur some performance costs, in exchange for the added
-precision it might provides:
-
-```ts
-import { isEqual } from 'lodash'; // @see [lodash.isEqual()](https://lodash.com/docs/4.17.15#isEqual)
-
-const subState = state.sub(key, isEqual);
-```
+In such a case, the `State` will actually retrace the change based on given values, adding a complete trace to the
+change object, and then routing it accordingly. This operation only happens at the depth that the change was made,
+since further down the trace is complete down to leaf-states. Additionally, due to efficient object-tree diffing,
+this single operation does not slow down the propagation of change by any means. Checkout the [post on performance](/docs/performance)
+to see how in details, but intuitively if the change is not properly traced, then all of the sub-tree would have to
+emit it in order to not be lossy (not emit when something is truly changed), which equals to a full sweep of the sub-tree,
+which could be used to diff the sub-tree instead.
 
 > :Buttons
-> > :Button url=/docs/precision#redundancy, label=Learn More
+> > :Button label=Learn More, url=/docs/performance
 
 > :ToCPrevNext

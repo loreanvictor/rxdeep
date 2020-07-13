@@ -1,4 +1,5 @@
 import { should, expect } from 'chai'; should();
+import { cloneDeep } from 'lodash';
 
 import { Subject } from 'rxjs';
 
@@ -58,10 +59,10 @@ describe('State', () => {
   it('should echo received changes in upstream back to downstream when root state.', () => {
     const r : Change<number>[] = [];
     const s = new State(42);
-    const change = { value: 45, from: 42, to: 45 };
+    const change = { value: 45, trace: { from: 42, to: 45 } };
     s.downstream.subscribe(c => r.push(c));
     s.upstream.next(change);
-    r[0].should.equal(change);
+    r[0].should.eql(change);
   });
 
   it('should emit values received from downstream.', () => {
@@ -70,8 +71,8 @@ describe('State', () => {
     const r : number[] = [];
     s.subscribe(v => r.push(v!!));
 
-    d.next({ value: 43, from: 42, to: 43 });
-    d.next({ value: 44, from: 43, to: 44 });
+    d.next({ value: 43, trace: { from: 42, to: 43 } });
+    d.next({ value: 44, trace: { from: 43, to: 44 } });
     r.should.eql([42, 43, 44]);
   });
 
@@ -79,10 +80,10 @@ describe('State', () => {
     const d = new Subject<Change<number>>();
     const s = new State(42, d, ignore());
     s.value.should.equal(42);
-    d.next({ value: 43, from: 42, to: 43 });
+    d.next({ value: 43, trace: { from: 42, to: 43 } });
     s.value.should.equal(42);                 // --> not subscribed, not in sync
     s.subscribe();
-    d.next({ value: 43, from: 42, to: 43 });
+    d.next({ value: 43, trace: { from: 42, to: 43 } });
     s.value.should.equal(43);
   });
 
@@ -101,9 +102,9 @@ describe('State', () => {
     s.next(42);
 
     r.should.eql([
-      { value: 43, from: 42, to: 43 },
-      { value: 42, from: 43, to: 42 },
-      { value: 42, from: 42, to: 42 }
+      { value: 43, trace: { from: 42, to: 43 } },
+      { value: 42, trace: { from: 43, to: 42 } },
+      { value: 42, trace: { from: 42, to: 42 } }
     ]);
   });
 
@@ -122,9 +123,9 @@ describe('State', () => {
     s.value = 42;
 
     r.should.eql([
-      { value: 43, from: 42, to: 43 },
-      { value: 42, from: 43, to: 42 },
-      { value: 42, from: 42, to: 42 }
+      { value: 43, trace: { from: 42, to: 43 } },
+      { value: 42, trace: { from: 43, to: 42 } },
+      { value: 42, trace: { from: 42, to: 42 } }
     ]);
   });
 
@@ -194,6 +195,37 @@ describe('State', () => {
     r.should.eql([42, 42, 43, 43]);
   });
 
+  it('should only emit when value has changed.', () => {
+    const r: any[] = [];
+    const r2: any[] = [];
+    const s = new State({ x: { y: 2 }, z: 3 });
+    s.sub('x').subscribe(v => r.push(v));
+    s.sub('z').subscribe(v => r2.push(v));
+    s.value = { x: { y: 2 }, z: 4 };
+    r.should.eql([{y: 2}]);
+    r2.should.eql([3, 4]);
+  });
+
+  it('should detect changes to arrays properly.', () => {
+    const r: any[] = [];
+    const r2: any[] = [];
+    const r3: any[] = [];
+    const s = new State({x: [1, 2, 3, 4], y: true });
+    s.sub('x').subscribe(v => r.push(cloneDeep(v)));
+    s.sub('x').sub(4).subscribe(v => r2.push(v));
+    s.subscribe(v => r3.push(cloneDeep(v)));
+
+    s.value = { x: [1, 2, 3, 4, 5], y: false};
+    s.sub('x').value = [2, 3, 4, 5];
+    r.should.eql([[1, 2, 3, 4], [1, 2, 3, 4, 5], [2 ,3, 4, 5]]);
+    r2.should.eql([undefined, 5, undefined]);
+    r3.should.eql([
+      {x: [1, 2, 3, 4], y: true},
+      {x: [1, 2, 3, 4, 5], y: false},
+      {x: [2, 3, 4, 5], y: false}
+    ]);
+  });
+
   describe('.sub()', () => {
     it('should set the initial value correctly based given key and its own value.', () => {
       new State('hellow').sub(1).value.should.equal('e');
@@ -211,8 +243,7 @@ describe('State', () => {
       new State([42, 43], new Subject<Change<number[]>>(), {
         next: change => {
           expect(change.value).to.eql([42, 44]);
-          expect(change.trace?.head?.sub).to.equal(1);
-          expect(change.trace?.rest).to.be.undefined;
+          expect(change.trace).to.eql({ subs: { 1: { from: 43, to: 44 } } });
           done();
         },
         error: () => {},
@@ -224,9 +255,15 @@ describe('State', () => {
       new State([{num: 42}, {num: 43}], new Subject<Change<{num: number}[]>>(), {
         next: change => {
           expect(change.value).to.eql([{num: 42}, {num: 44}]);
-          expect(change.trace?.head?.sub).to.equal(1);
-          expect(change.trace?.rest?.head?.sub).to.equal('num');
-          expect(change.trace?.rest?.rest).to.be.undefined;
+          expect(change.trace).to.eql({
+            subs: {
+              1: {
+                subs: {
+                  num: { from: 43, to: 44 }
+                }
+              }
+            }
+          });
           done();
         },
         error: () => {},
@@ -239,9 +276,9 @@ describe('State', () => {
       const d = new Subject<Change<number[]>>();
       const s = new State([42, 43], d, ignore());
       s.sub(0).downstream.subscribe(c => r.push(c));
-      d.next({ value: [45, 43], from: 42, to: 45, trace: { head: { sub: 0 } }});
+      d.next({ value: [45, 43], trace: { subs: { 0: { from: 42, to: 45 }} }});
       expect(r[0].value).to.equal(45);
-      expect(r[0].trace).to.be.undefined;
+      expect(r[0].trace).to.eql({ from: 42, to: 45 });
     });
 
     it('should not route changes not addressing the same key to the sub-state downstream.', () => {
@@ -249,7 +286,7 @@ describe('State', () => {
       const d = new Subject<Change<number[]>>();
       const s = new State([42, 43], d, ignore());
       s.sub(1).downstream.subscribe(c => r.push(c));
-      d.next({ value: [45, 43], from: 42, to: 45, trace: { head: { sub: 0 } }});
+      d.next({ value: [45, 43], trace: { subs: { 0: { from: 42, to: 45 } } }});
       r.length.should.equal(0);
     });
 
@@ -260,14 +297,21 @@ describe('State', () => {
       s.sub(0).downstream.subscribe(c => r.push(c));
       d.next({
         value: [{num: 45}, {num: 43}],
-        from: 42, to: 45,
-        trace: { 
-          head: { sub: 0 },
-          rest: { head: { sub: 'num' } }
+        trace: {
+          subs: {
+            0: {
+              subs: {
+                num: { from: 42, to: 45 }
+              }
+            }
+          }
         }
       });
-      expect(r[0].trace?.head?.sub).to.equal('num');
-      expect(r[0].trace?.rest).to.be.undefined;
+      expect(r[0].trace).to.eql({
+        subs: {
+          num: { from: 42, to: 45 }
+        }
+      });
     });
 
     it('should route changes without a trace that mutate sub-state value to sub-state downstream.', () => {
@@ -275,9 +319,8 @@ describe('State', () => {
       const d = new Subject<Change<number[]>>();
       const s = new State([42, 43], d, ignore());
       s.sub(0).downstream.subscribe(c => r.push(c));
-      d.next({ value: [45, 43], from: [42, 43], to: [45, 43] });
+      d.next({ value: [45, 43], trace: { from: [42, 43], to: [45, 43] }});
       expect(r[0].value).to.equal(45);
-      expect(r[0].trace).to.be.undefined;
     });
 
     it('should not route changes without a trace that do not mutate sub-state value to sub-state downstream.', () => {
@@ -285,22 +328,8 @@ describe('State', () => {
       const d = new Subject<Change<number[]>>();
       const s = new State([42, 43], d, ignore());
       s.sub(1).downstream.subscribe(c => r.push(c));
-      d.next({ value: [45, 43], from: [42, 43], to: [45, 43] });
+      d.next({ value: [45, 43], trace: { from: [42, 43], to: [45, 43] } });
       r.length.should.equal(0);
-    });
-
-    it('should invoke passed equality check to determine whether sub-state value mutates by a trace-less change.', 
-    () => {
-      const r : Change<number>[] = [];
-      const r2 : [number, number][] = [];
-      const s = new State([42, 43]);
-      s.sub(0, (_new, _old) => {
-        r2.push([_new!!, _old!!]);
-        return true;
-      }).downstream.subscribe(c => r.push(c));
-      s.value = [45, 43];
-      r.length.should.equal(0);
-      r2.should.eql([[45, 42]]);
     });
 
     it('should set the value of undefined for sub-sub-states for changes that make the sub-state undefined.', () => {
@@ -321,6 +350,20 @@ describe('State', () => {
         },
         complete: () => {},
       }).sub(1).error(err);
+    });
+
+    it('should only emit when value has changed.', () => {
+      const r: any[] = [];
+      const r2: any[] = [];
+      const r3: any[] = [];
+      const s = new State({ T: { x: { y: 2 }, z: 3 }, W: 1 });
+      s.sub('T').sub('x').subscribe(v => r.push(v));
+      s.sub('W').subscribe(v => r2.push(v));
+      s.sub('T').sub('z').subscribe(v => r3.push(v));
+      s.value = { T: { x: { y: 2 }, z: 4} , W: 1 };
+      r.should.eql([{ y : 2 }]);
+      r2.should.eql([ 1 ]);
+      r3.should.eql([3, 4]);
     });
   });
 });

@@ -3,7 +3,6 @@ import { KeyFunc, KeyMap, ListChanges } from '../types';
 
 export class Watcher<T> {
   private _keymap: KeyMap<T>;
-  private _last: T[];
 
   constructor(initial: T[] | undefined, readonly keyFunc: KeyFunc<T>) {
     this._keymap = {};
@@ -29,21 +28,20 @@ export class Watcher<T> {
       if (!(_key in keymap)) changes.deletions.push(entry);
       else {
         const _newEntry = keymap[_key];
-        if (_newEntry.index != entry.index) 
+        if (_newEntry.index !== entry.index) {
           changes.moves.push({
             oldIndex: entry.index,
             newIndex: _newEntry.index,
             item: entry.item
           });
+        }
       }
     });
 
     this._keymap = keymap;
-    this._last = list;
 
     return changes;
   }
 
   public get keymap() { return this._keymap; }
-  public get last() { return this._last; }
 }

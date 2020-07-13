@@ -56,7 +56,7 @@ describe('VerifiedState', () => {
     sub.value = { x: 2 };
     sub.value.should.eql({ x : 1 });
 
-    const sub2 = v.sub(0).sub('x');; sub2.subscribe();
+    const sub2 = v.sub(0).sub('x'); sub2.subscribe();
     sub2.value = 2;
     sub2.value.should.equal(1);
     sub.value.should.eql({ x: 1 });
@@ -65,7 +65,7 @@ describe('VerifiedState', () => {
     sub2.value.should.equal(3);
     sub.value.should.eql({ x: 3 });
 
-    r.should.eql([1, 1, 3]);
+    r.should.eql([1, 1, 1, 3]);
     r2.should.eql([1, 3]);
   });
 
@@ -87,7 +87,7 @@ describe('VerifiedState', () => {
     v.value = 44;
 
     r.length.should.equal(1);
-    r.should.eql([{ value: 44, from: 42, to: 44 }]);
+    r.should.eql([{ value: 44, trace: { from: 42, to: 44 } }]);
   });
 
   it('should allow non-verifable values from upstream / original state.', () => {
@@ -147,8 +147,8 @@ describe('VerifiedState', () => {
       v.value = 46;
 
       r.should.eql([
-        { value: 43, from: 42, to: 43 },
-        { value: 45, from: 44, to: 45 },
+        { value: 43, trace: { from: 42, to: 43 } },
+        { value: 45, trace: { from: 44, to: 45 } },
       ])
     });
 

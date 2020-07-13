@@ -1,17 +1,7 @@
-import { State } from '../src';
-import { isEqual } from 'lodash';
+import { State, KeyedState } from '../src';
 
-const s = new State({ x: { y: 2 }, z: 4});
-s.sub('x').subscribe(console.log);
-// s.sub('x').sub('y').subscribe(console.log);
-// s.value = {x : {y: 2}, z: 3};
-s.upstream.next({
-  from: 4, to: 3,
-  value: { z: 3, x: { y: 2 } },
-  trace: {
-    head: { sub: 'z' }
-  }
-});
-// s.value = { ...s.value, z: 3 };
+const state = new State([{ id: 101, name: 'Jill' }, { id: 102, name: 'Jack' }]);
 
+state.downstream.subscribe(console.log);    // --> Log changes
+state.sub(1).sub('name').value = 'Dude';
 

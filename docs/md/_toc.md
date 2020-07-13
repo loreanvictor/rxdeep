@@ -1,4 +1,7 @@
 [Home](/)
 [State](/docs/state)
+[Key Tracking](/docs/keyed-state)
+[Change Verification](/docs/verified-state)
+[Change](/docs/change)
 [Performance](/docs/performance)
 [Precision](/docs/precision)

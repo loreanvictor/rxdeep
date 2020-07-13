@@ -76,7 +76,7 @@ For each such change, **RxDeep** performs one assignment by reference (to update
 and constructs a trace object, passing the change with the trace object to the upstream. This would result in [\Omicron(d)](:Formula)
 operations until the change reaches the root of the state-tree (alongside [\Omicron(d)](:Formula) trace objects).
 
-The root state typically bounces the change back. Each recepient state will emit the new value, and perform equality
+The root state then typically bounces the change back. Each recepient state will emit the new value, and perform equality
 checks between all of its generated sub-keys and head of received trace. On match, it will extract the downstream trace
 and pass down the resulting change to the matching sub-key. Assuming an average number of [k](:Formula) sub-states per state,
 this yields [\Omicron(kd)](:Formula) equality checks and [\Omicron(d)](:Formula) emissions until the change is fully
@@ -131,22 +131,17 @@ From the changed state upwards (towards the root), **RxDeep** behaves as before 
 track changes, resulting in [\Omicron(\delta)](:Formula) or [\Omicron(\log(n) - \log(n_{\delta}))](:Formula)
 operations (the latter holding for a typical state-tree).
 
-For downward propagation, **RxDeep** equality checks on values instead of sub-keyes,
-which, in the default case, will result in [\Omicron(kn_{\delta}(d - \delta))](:Formula)
-operations. Since [k](:Formula) is a constant, this yields [\Omicron((d - \delta)n_{\delta})](:Formula)
-operations, [\Omicron(n_{\delta}\log(n_{\delta}))](:Formula) for typical state-trees,
-matching worst-case lower bound on any particular depth [\delta](:Formula).
+For downward propagation, the state conducts a sweep of its sub-tree and complete the trace. This is called
+_post-tracing_, and in worst-case scenario it requires [\Omicron(n_{\delta}\log(n_{\delta}))](:Formula) operations.
+After that changes can be down-propagated precisely, and since in worst-case all of the sub-tree nodes would need
+to emit due to changes, adding another [\Omicron(n_{\delta}\log(n_{\delta}))](:Formula) emissions.
 
-> [touch_app](:Icon) **NOTE**
+This means in total the change propagation mechanism requires [\Omicron(\log(n) + (2n_{\delta} - 1)\log(n_{\delta}))](:Formula)
+operations, which is of the same order at the minimum calculated above, i.e.
+
+> :Formula
 >
-> This analysis only holds for when the default equality check (`===` operator) is used,
-> or when the provided equality check operates in [\Omicron(1)](:Formula).
->
-> For arbitrary equality check with complexity of [E(\Delta, N)](:Formula), the computational
-> complexity would be [\Omicron(\delta + n_{\delta}(d - \delta)E(d - \delta, n_{\delta}))](:Formula).
->
-> > :Buttons
-> > > :Button label=Learn More, url=/docs/precision
+> \Omicron(\log(n) + n_{\delta}\log(n_{\delta}))
 
 ---
 
@@ -175,5 +170,14 @@ n => n % 17;
 If the key function does not have complexity of [\Omicron(1)](:Formula), say [\Omicron(\lambda)](:Formula)
 for some non-constant [\lambda](:Formula), then upon each change the `KeyedState` would be conducting
 [\Omicron(\lambda n)](:Formula) operations.
+
+When indexed items in the array are moved around, the `KeyedState` also conducts partial retracing
+to generate a change trace invariant to its keys. This does not involve invoking the key function,
+but worst-case can add [\Omicron(n\log(n))](:Formula) operations to change propagation
+process. 
+
+This worst case only occurs when all of the items of the array are shifted and their corresponding
+values are also mutated all the way to the leafs. In a typical case when the items of the array are
+moved without being modified themselves, then this lowers to [\Omicron(n)](:Formula) operations.
 
 > :ToCPrevNext
