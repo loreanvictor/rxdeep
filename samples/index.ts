@@ -1,7 +1,34 @@
-import { State, KeyedState } from '../src';
+import { State, change } from '../src';
 
-const state = new State([{ id: 101, name: 'Jill' }, { id: 102, name: 'Jack' }]);
+const c = change(
+  {
+    x: { y: false },
+    z: 3
+  },
+  {
+    x: { y: true },
+    z: 3
+  }
+);
 
-state.downstream.subscribe(console.log);    // --> Log changes
-state.sub(1).sub('name').value = 'Dude';
+console.log(c);
 
+// const state = new State({
+//   x: { y: false },
+//   z: 3
+// });
+
+// state.sub('x').sub('y').subscribe(console.log);
+
+// state.upstream.next({
+//   value: { x: { y: true }, z: 3 },
+//   trace: {
+//     subs: {
+//       x: {
+//         subs: {
+//           y: { from: false, to: true }
+//         }
+//       }
+//     }
+//   }
+// });

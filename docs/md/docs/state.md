@@ -399,6 +399,9 @@ it accordingly, removing the head of the change trace in the process.
 > of some particular change, you should emit a reverse change object on the downstream in response.
 > Simply ignoring a change will cause the `State`'s value to go out of sync with the change history
 > and the emission history.
+>
+> > :Buttons
+> > > :Button label=Learn More, url=/docs/change#reverting-changes
 
 <br>
 

@@ -319,6 +319,9 @@ state.sub(1).sub('name').value = 'Dude';
 }
 ```
 
+> :Buttons
+> > :Button label=Learn More, url=/docs/change
+
 Furthermore, `KeyedState`s provide detailed array changes, i.e. additions/deletions on particular indexes,
 or items being moved from one index to another.
 
@@ -349,7 +352,7 @@ state.value = [
 ```
 
 > :Buttons
-> > :Button label=Learn More, url=/docs/change
+> > :Button label=Learn More, url=/docs/keyed-state#detailed-array-changes
 
 <br>
 
@@ -397,5 +400,10 @@ and minor utilities for that. This in turn makes **RxDeep** pretty easy to learn
 **RxDeep** is written in [TypeScript](https://www.typescriptlang.org/) with detailed type annotations, 
 which should greatly improve development experience even if you use it in JavaScript (error highlighting, autocompletes, etc).
 
+> :MetaOverride target=description
+>
+> Reactive state-management using RxJS. Manage complex state-trees in a fast, precise and 
+> flexible manner. Monitor changes at any part of the state-tree, issue changes at any part of
+> the state tree, verify changes, record them, replay them, distribute your state tree across network, etc.
 
 > :ToCPrevNext

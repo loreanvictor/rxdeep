@@ -1,5 +1,5 @@
 import { Observable, Observer, Subject } from 'rxjs';
-import { map, filter, multicast, refCount, startWith, tap } from 'rxjs/operators';
+import { map, filter, multicast, refCount, startWith, tap, distinctUntilChanged } from 'rxjs/operators';
 
 import { State } from './state';
 import { KeyFunc, ListChanges, Change, isLeaf, ChangeTraceNode, ChangeTrace } from './types';
@@ -123,7 +123,8 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
   index(key: number | string) {
     return this._changes.pipe(
       map(() => this._watcher.keymap[key]?.index),
-      startWith(this._watcher.keymap[key]?.index)
+      startWith(this._watcher.keymap[key]?.index),
+      distinctUntilChanged(),
     );
   }
 

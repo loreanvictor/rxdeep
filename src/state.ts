@@ -77,7 +77,10 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
   subUpstream<K extends keyof T>(key: K): Observer<Change<T[K]>> {
     return {
       next: change => {
-        this.value[key] = change.value!!;
+        if (this.value) {
+          this.value[key] = change.value!!;
+        }
+
         this.upstream.next({
           value: this.value,
           trace: {

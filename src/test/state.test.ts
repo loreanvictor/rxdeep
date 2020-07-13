@@ -365,5 +365,10 @@ describe('State', () => {
       r2.should.eql([ 1 ]);
       r3.should.eql([3, 4]);
     });
+
+    it('should not throw an error when setting value on a collapsed sub-state.', () => {
+      const s = new State([{x: 1}, {x: 2}]);
+      s.sub(2).sub('x').value = 3;
+    });
   });
 });

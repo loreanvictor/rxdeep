@@ -309,6 +309,17 @@ describe('KeyedState', () => {
       s.value = [43, 42];
       r.should.eql([undefined, 1]);
     });
+
+    it('should emit when index has changed.', () => {
+      const r: any[] = [];
+      const s = new State([42, 43, 44, 45]);
+      const k = new KeyedState(s, n => n);
+      k.index(42).subscribe(i => r.push(i));
+      s.value = [42, 43, 44];
+      s.value = [43, 44, 42];
+      s.value = [44, 43, 42];
+      r.should.eql([0, 2]);
+    });
   });
 
   describe('.changes()', () => {
