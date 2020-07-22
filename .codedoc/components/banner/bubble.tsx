@@ -16,10 +16,10 @@ export interface BubbleOptions {
 const BubbleStyle = themedStyle<CodedocTheme>(theme => ({
   bubble: {
     position: 'absolute',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    backfaceVisibility: 'hidden',
-    WebkitBackfaceVisibility: 'hidden',
+    '&.blur': {
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+    },
     bottom: 0,
     opacity: 0,
     border: `6px solid ${color(theme.dark.background).alpha(.08).toString()}`,
@@ -49,7 +49,7 @@ export function Bubble(
   renderer: RendererLike<any, any>,
 ) {
   const classes = this.theme.classes(BubbleStyle);
-  return <div class={classes.bubble} style={`
+  return <div class={`${classes.bubble} ${options?.z!! >= 1 ? 'blur' : ''}`} style={`
     left: ${options.x}%; z-index: ${options.z || '-1'};
     border-radius: ${options.radius}px; width: ${options.radius}px; height: ${options.radius}px;
     margin-left: -${options.radius/2}px;
