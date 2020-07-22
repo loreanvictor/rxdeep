@@ -118,10 +118,10 @@
     opacity: 0;
     position: absolute;
     animation: keyframes-bubble-motion-0-0-10 8s ease-in infinite;
+  }
+  .bubble-0-0-9.blur {
     backdrop-filter: blur(12px);
-    backface-visibility: hidden;
     -webkit-backdrop-filter: blur(12px);
-    -webkit-backface-visibility: hidden;
   }
   body.dark .bubble-0-0-9 {
     border-color: rgba(255, 255, 255, 0.08);
