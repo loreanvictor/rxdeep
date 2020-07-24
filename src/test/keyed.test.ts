@@ -1,8 +1,9 @@
 import { should, expect } from 'chai'; should();
 
+import { Subject } from 'rxjs';
+
 import { KeyedState } from '../keyed';
 import { State } from '../state';
-import { Subject } from 'rxjs';
 import { Change, ListChanges } from '../types';
 
 

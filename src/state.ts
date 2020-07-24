@@ -1,12 +1,12 @@
 import { Observable, Observer, Subject } from 'rxjs';
 import { filter, map, tap, multicast, refCount } from 'rxjs/operators';
 
-import { Change, isLeaf, ChangeTraceNode } from './types';
+import { Change, isLeaf, ChangeTraceNode } from './types/changes';
 import { postTrace } from './util/post-trace';
 
 
 export class State<T> extends Observable<T | undefined> implements Observer<T | undefined> {
-  private _value: T | undefined;
+  protected _value: T | undefined;
   readonly downstream: Observable<Change<T>>;
   readonly upstream: Observer<Change<T>>;
   private _changesub: Subject<Change<T>>;

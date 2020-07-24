@@ -2,7 +2,8 @@ import { Observable, Observer, Subject } from 'rxjs';
 import { map, filter, multicast, refCount, startWith, tap, distinctUntilChanged } from 'rxjs/operators';
 
 import { State } from './state';
-import { KeyFunc, ListChanges, Change, isLeaf, ChangeTraceNode, ChangeTrace } from './types';
+import { KeyFunc, ListChanges } from './types/keyed-lists';
+import { Change, isLeaf, ChangeTraceNode, ChangeTrace } from './types/changes';
 import { Watcher } from './util/watcher';
 import { trace } from './trace';
 

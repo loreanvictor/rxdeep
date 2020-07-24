@@ -4,4 +4,5 @@ describe('rxdeep', () => {
   require('./reverse.test');
   require('./verified.test');
   require('./keyed.test');
+  require('./persistent.test');
 });

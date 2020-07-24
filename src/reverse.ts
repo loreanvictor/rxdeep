@@ -1,4 +1,4 @@
-import { Change, isLeaf, ChangeTrace } from './types';
+import { Change, isLeaf, ChangeTrace } from './types/changes';
 
 
 function clean<T>(l: T[]) {

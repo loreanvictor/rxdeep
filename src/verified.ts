@@ -2,7 +2,7 @@ import { Subject, defer, merge } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { State } from './state';
-import { Change } from './types';
+import { Change } from './types/changes';
 import { reverse } from './reverse';
 import { takeUntilCompletes } from './util/take-until-completes';
 
