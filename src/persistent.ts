@@ -1,7 +1,7 @@
 import { merge, OperatorFunction } from 'rxjs';
-import { tap, filter, take } from 'rxjs/operators';
+import { tap, filter } from 'rxjs/operators';
 
-import { Storage, isPush, PushStorage } from './types/storage';
+import { Storage } from './types/storage';
 import { Change } from './types/changes';
 import { State } from './state';
 
@@ -11,7 +11,7 @@ export class PersistentState<T> extends State<T> {
 
   constructor(
     readonly state: State<T>,
-    readonly storage: Storage<T> | PushStorage<T>,
+    readonly storage: Storage<T> ,
     readonly transform?: OperatorFunction<Change<T>, Change<T>>,
   ) {
     super(
@@ -27,29 +27,15 @@ export class PersistentState<T> extends State<T> {
           }),
           filter(() => false),
         ),
-        ...(isPush(storage) ? [
-          storage.changes().pipe(
-            tap(value => this._receive(value)),
-            filter(() => false),
-          )
-        ] : [])
+        storage.load().pipe(
+          tap(value => {
+            this._received = value;
+            this.next(value);
+          }),
+          filter<any>(() => false),
+        ),
       ),
       state.upstream,
     );
-
-    const stored = storage.load();
-    if (stored) {
-      stored.pipe(take(1)).subscribe(t => {
-        this._value = t;
-        this._receive(t);
-      })
-    } else {
-      storage.save(state.value);
-    }
-  }
-
-  private _receive(t: T | undefined) {
-    this._received = t;
-    this.next(t);
   }
 }
