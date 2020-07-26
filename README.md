@@ -18,29 +18,29 @@ with a precision emission system that ensures you only get values when something
 ▷ Create a state object:
 
 ```ts
-import { State } from 'rxdeep';
+import { state } from 'rxdeep';
 
-const state = new State([ { name: 'John' }, { name: 'Jack' }, { name: 'Jill' } ]);
+const _state = state([ { name: 'John' }, { name: 'Jack' }, { name: 'Jill' } ]);
 ```
 
 ▷ Listen to changes on `'name'` property of index 1 on the list:
 ```ts
-state.sub(1).sub('name').subscribe(console.log);     // --> logs `Jack`
+_state.sub(1).sub('name').subscribe(console.log);     // --> logs `Jack`
 ```
 
 ▷ You can modify the top-level state:
 ```ts
-state.value = [ { name: 'Julia' }, ...state.value ]; // --> logs `John`, since `John` is index 1 now
+_state.value = [ { name: 'Julia' }, ...state.value ]; // --> logs `John`, since `John` is index 1 now
 ```
 
 ▷ Or mid-level states:
 ```ts
-state.sub(1).value = { name: 'Josef' };              // --> logs `Josef`
+_state.sub(1).value = { name: 'Josef' };              // --> logs `Josef`
 ```
 
 ▷ Or another sub-state with the same address:
 ```ts
-state.sub(1).sub('name').value = 'Jafet';            // --> logs `Jafet`
+_state.sub(1).sub('name').value = 'Jafet';            // --> logs `Jafet`
 ```
 
 ▷ [RxJS](https://rxjs.dev) interop:
@@ -50,12 +50,12 @@ import { map } from 'rxjs/operators';
 
 interval(1000)
 .pipe(map(i => ({ name: `Jarvis #${i}`})))
-.subscribe(state.sub(1));                            // --> logs `Jarvis #0`, `Jarvis #1`, `Jarvis #2`, ...
+.subscribe(_state.sub(1));                            // --> logs `Jarvis #0`, `Jarvis #1`, `Jarvis #2`, ...
 ```
 ```ts
 import { debounceTime } from 'rxjs/operators';
 
-state.sub(1).pipe(debounceTime(1000)).subscribe(console.log); // --> debounces changes for 1 second
+_state.sub(1).pipe(debounceTime(1000)).subscribe(console.log); // --> debounces changes for 1 second
 ```
 
 [👉 Learn more.](https://loreanvictor.github.io/rxdeep/#quick-tour)
