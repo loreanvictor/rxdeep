@@ -9,6 +9,9 @@ etc.
 npm i rxdeep
 ```
 
+> :Buttons
+> > :Button label=Other Installation Methods, url=/docs/install
+
 ---
 
 # Quick Tour

@@ -1,4 +1,5 @@
 [Home](/)
+[How to Install](/docs/install)
 [State](/docs/state)
 [Key Tracking](/docs/keyed-state)
 [Change Verification](/docs/verified-state)
