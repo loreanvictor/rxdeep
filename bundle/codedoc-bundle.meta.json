@@ -69,6 +69,11 @@
       "name": "postNavSearch",
       "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/search/post-nav/index.js",
       "hash": "2/YwWhb6mI0CYQECJBG9yg=="
+    },
+    {
+      "name": "copyLineLinks",
+      "filename": "/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/line-links/copy-line-link.js",
+      "hash": "MCk3TzDQa4FbU87znZPNpg=="
     }
   ],
   "components": [

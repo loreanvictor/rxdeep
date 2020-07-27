@@ -13,6 +13,7 @@ import { loadDeferredIFrames } from '/home/runner/work/rxdeep/rxdeep/.codedoc/no
 import { smoothLoading } from '/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/transport/smooth-loading.js';smoothLoading();
 import { tocHighlight } from '/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/toc-highlight.js';tocHighlight();
 import { postNavSearch } from '/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/search/post-nav/index.js';postNavSearch();
+import { copyLineLinks } from '/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/code/line-links/copy-line-link.js';copyLineLinks();
 import { ToCPrevNext } from '/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/prevnext/index.js';
 import { GithubSearch } from '/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/misc/github/search.js';
 import { ToCToggle } from '/home/runner/work/rxdeep/rxdeep/.codedoc/node_modules/@codedoc/core/dist/es6/components/page/toc/toggle/index.js';
