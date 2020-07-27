@@ -1,7 +1,7 @@
 import { should, expect } from 'chai'; should();
 
-import { VerifiedState } from '../verified';
-import { State } from '../state';
+import { VerifiedState, verified } from '../verified';
+import { State, state } from '../state';
 import { Change } from '../types';
 import { Subject } from 'rxjs';
 
@@ -169,5 +169,18 @@ describe('VerifiedState', () => {
       s.complete();
       sub.closed.should.be.true;
     });
+  });
+});
+
+
+describe('verified()', () => {
+  it('should create a `VerifiedState` with given original state and verifier.', () => {
+    const s = state(42);
+    const vf = () => false;
+    const v = verified(s, vf);
+
+    v.state.should.equal(s);
+    v.verifier.should.equal(vf);
+    v.should.be.instanceOf(VerifiedState);
   });
 });

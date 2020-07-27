@@ -13,11 +13,11 @@ npm i rxdeep
 
 # Quick Tour
 
-Create a [`State`](/docs/state):
+Create a [state](/docs/state):
 
 ```ts
-import { State } from 'rxdeep';
-const state = new State([ { name: 'John' }, { name: 'Jack' }, { name: 'Jill' } ]);
+import { state } from 'rxdeep';
+const s = state([ { name: 'John' }, { name: 'Jack' }, { name: 'Jill' } ]);
 ```
 
 <br>
@@ -25,25 +25,25 @@ const state = new State([ { name: 'John' }, { name: 'Jack' }, { name: 'Jill' } ]
 Listen to a [sub-state](/docs/state#sub-states):
 
 ```ts
-state.sub(1).sub('name').subscribe(console.log); // --> subscribes to property `name` of object at index 1 of the array
+s.sub(1).sub('name').subscribe(console.log); // --> subscribes to property `name` of object at index 1 of the array
 ```
 
 <br>
 
 Modify root state:
 ```ts
-state.value = [ { name: 'Julia' }, ...state.value ]; // --> logs `John`, since `John` is index 1 now
+s.value = [ { name: 'Julia' }, ...s.value ]; // --> logs `John`, since `John` is index 1 now
 ```
 
 ... or mid-level states:
 
 ```ts
-state.sub(1).value = { name: 'Josef' };              // --> logs `Josef`
+s.sub(1).value = { name: 'Josef' };              // --> logs `Josef`
 ```
 
 ... or leaf-states on the same address:
 ```ts
-state.sub(1).sub('name').value = 'Jafet';            // --> logs `Jafet`
+s.sub(1).sub('name').value = 'Jafet';            // --> logs `Jafet`
 ```
 
 <br>
@@ -51,10 +51,9 @@ state.sub(1).sub('name').value = 'Jafet';            // --> logs `Jafet`
 [Verify changes](/docs/verified-state) to the state:
 
 ```ts
-import { State, VerifiedState } from 'rxdeep';
+import { state, verified } from 'rxdeep';
 
-const s = new State(12);
-const v = new VerifiedState(s, change => change.from < change.to); // --> only increasing numbers
+const v = verified(state(12), change => change.from < change.to); // --> only increasing numbers
 
 v.subscribe(console.log);
 
@@ -67,7 +66,7 @@ v.value = 15; // --> logs 15
 
 <br>
 
-A `State` is an [`Observer`](https://rxjs.dev/guide/observer):
+A state is an [`Observer`](https://rxjs.dev/guide/observer):
 
 ```ts
 import { interval } from 'rxjs';
@@ -75,41 +74,43 @@ import { map } from 'rxjs/operators';
 
 interval(1000)
 .pipe(map(i => ({ name: `Jarvis #${i}`})))
-.subscribe(state.sub(1));                            // --> logs `Jarvis #0`, `Jarvis #1`, `Jarvis #2`, ...
+.subscribe(s.sub(1));                            // --> logs `Jarvis #0`, `Jarvis #1`, `Jarvis #2`, ...
 ```
 
 <br>
 
-A `State` is an [`Observable`](https://rxjs.dev/guide/observable):
+A state is an [`Observable`](https://rxjs.dev/guide/observable):
 
 ```ts
 import { debounceTime } from 'rxjs/operators';
 
-state.sub(1).pipe(debounceTime(1000)).subscribe(console.log); // --> debounces changes for 1 second
+s.sub(1).pipe(debounceTime(1000)).subscribe(console.log); // --> debounces changes for 1 second
 ```
 
 <br>
 
-[Track `keys` instead of indexes](/docs/keyed-state):
+[Track keys instead of indexes](/docs/keyed-state):
 
 ```ts
-import { State, KeyedState } from 'rxdeep';
+import { state, keyed } from 'rxdeep';
 
-const state = new State([{ id: 101, name: 'Jill' }, { id: 102, name: 'Jack' }]);
-const keyed = new KeyedState(state, p => p.id);
+const k = keyed(state(
+    [{ id: 101, name: 'Jill' }, { id: 102, name: 'Jack' }]
+  ), p => p.id
+);
 
-keyed.key(101).sub('name').subscribe(console.log);     // --> logs `Jill`
+k.key(101).sub('name').subscribe(console.log);     // --> logs `Jill`
 
-state.value = [state.value[1], state.value[0]];      // --> no log
-state.sub(1).sub('name').value = 'John';             // --> logs `John`
+k.value = [k.value[1], k.value[0]];                // --> no log
+k.sub(1).sub('name').value = 'John';               // --> logs `John`
 ```
 
 <br>
 
-Track index of a specific `key`:
+Track index of a specific key:
 
 ```ts
-keyed.index(101).subscribe(console.log);      // --> logs 0, 1
+k.index(101).subscribe(console.log);      // --> logs 0, 1
 ```
 
 ---
@@ -130,16 +131,16 @@ on the DOM sub-tree that have really changed.
 
 ## ![](https://reactjs.org/favicon.ico) React
 
-You can use [RxJS-hooks](https://github.com/LeetCode-OpenSource/rxjs-hooks) for fetching and rendering `State`s in [React](https://reactjs.org/) components.
+You can use [RxJS-hooks](https://github.com/LeetCode-OpenSource/rxjs-hooks) for fetching and rendering states in [React](https://reactjs.org/) components.
 This _should_ also result in better performance as it should reduce number of redundant tree diffs conducted by React.
 
 ```tsx
 /*!*/import { useObservable } from 'rxjs-hooks';
 
-const state = new State(...);
+const s = state(...);
 
 function MyComponent(...) {
-/*!*/  const value = useObservable(() => state.sub('something')) || {};
+/*!*/  const value = useObservable(() => s.sub('something')) || {};
 /*!*/  return <div>{value.property}</div>
 }
 ```
@@ -150,18 +151,18 @@ function MyComponent(...) {
 
 ## ![](https://angular.io/assets/images/favicons/favicon.ico) Angular
 
-You can use [Angular](https://angular.io/)'s [async pipe](https://angular.io/guide/observables-in-angular) to render `State`s or
+You can use [Angular](https://angular.io/)'s [async pipe](https://angular.io/guide/observables-in-angular) to render states or
 sub-states:
 
 ```html
-<div>{{state | async}}</div>
-<div>{{state.sub('property') | async}}</div>
+<div>{{s | async}}</div>
+<div>{{s.sub('property') | async}}</div>
 ```
 
-You can also utilize [Angular](https://angular.io/)'s `[(ngModel)]` syntax to bind `State` objects to inputs:
+You can also utilize [Angular](https://angular.io/)'s `[(ngModel)]` syntax to bind states to inputs:
 
 ```html
-<input [(ngModel)]="state.sub('property').value" type="text" />
+<input [(ngModel)]="s.sub('property').value" type="text" />
 ```
 
 > :Buttons
@@ -171,7 +172,7 @@ You can also utilize [Angular](https://angular.io/)'s `[(ngModel)]` syntax to bi
 
 ## ![](https://vuejs.org/images/logo.png) Vue.js
 
-You can use [vue-rx](https://github.com/vuejs/vue-rx) to render `State` objects in your Vue apps, which should (I don't know if it would)
+You can use [vue-rx](https://github.com/vuejs/vue-rx) to render states in your Vue apps, which should (I don't know if it would)
 yield similar performance improvements:
 
 ```ts
@@ -181,18 +182,18 @@ yield similar performance improvements:
 new Vue({
   el: '#app',
 /*!*/  subscriptions: {
-/*!*/    state,
-/*!*/    name: state.sub('name')
+/*!*/    s,
+/*!*/    name: s.sub('name')
 /*!*/  }
 });
 ```
 
 ```html
-<div>{{ state }}</div>
+<div>{{ s }}</div>
 <div>{{ name }}</div>
 ```
 
-You can use `v-model` syntax to directly bind inputs and `State` objects:
+You can use `v-model` syntax to directly bind inputs and states:
 
 ```ts
 new Vue({
@@ -202,7 +203,7 @@ new Vue({
 })
 ```
 ```html
-/*!*/<input type="text" v-model="state.sub('name').value"/>
+/*!*/<input type="text" v-model="s.sub('name').value"/>
 ```
 
 > :Buttons
@@ -216,10 +217,10 @@ As mentioned above, **RxDeep** provides precision change emission, which means y
 state changes and surgically update DOM tree accordingly:
 
 ```js
-state.sub('name').subscribe(name => nameElement.textContent = name);
+s.sub('name').subscribe(name => nameElement.textContent = name);
 ```
 
-Specifically, you can utilize `KeyedState` and its `.changes()` method to receive [detailed
+Specifically, you can utilize `KeyedState` (`keyed()`) and its `.changes()` method to receive [detailed
 array changes](#change-history) that enable you to precisely modify dynamic DOM trees based on collections
 and arrays.
 
@@ -278,16 +279,16 @@ Basically do not change an object without changing its reference.
 <span style="color: #fa163f">**DON'T:**</span>
 
 ```ts
-state.value.push(x);                   // --> WRONG!
-state.value.x = y;                     // --> WRONG!
+/*~*/s.value.push(x)/*~*/;                   // --> WRONG!
+/*~*/s.value.x = y/*~*/;                     // --> WRONG!
 ```
 
 <span style="color: #27aa80">**DO:**</span>
 
 ```ts
-state.value = state.value.concat(x);   // --> CORRECT!
-state.sub('x').value = y;              // --> CORRECT!
-state.value = { ...state.value, x: y } // --> CORRECT!
+s.value = s.value.concat(x);   // --> CORRECT!
+s.sub('x').value = y;               // --> CORRECT!
+s.value = { ...s.value, x: y } // --> CORRECT!
 ```
 
 > :Buttons
@@ -301,8 +302,8 @@ State tree is kept in sync by tracking changes (via `Change` objects). This simp
 directly, record them, replay them, etc.
 
 ```ts
-state.downstream.subscribe(console.log);    // --> Log changes
-state.sub(1).sub('name').value = 'Dude';
+s.downstream.subscribe(console.log);    // --> Log changes
+s.sub(1).sub('name').value = 'Dude';
 
 // This object will be logged:
 { 
@@ -322,16 +323,18 @@ state.sub(1).sub('name').value = 'Dude';
 > :Buttons
 > > :Button label=Learn More, url=/docs/change
 
-Furthermore, `KeyedState`s provide detailed array changes, i.e. additions/deletions on particular indexes,
+Furthermore, keyed states provide detailed array changes, i.e. additions/deletions on particular indexes,
 or items being moved from one index to another.
 
 ```ts
-const state = new State([{ id: 101, name: 'Jack' }, { id: 102, name: 'Jill' }]);
-const keyed = new KeyedState(state, p => p.id);
+const k = keyed(state(
+    [{ id: 101, name: 'Jack' }, { id: 102, name: 'Jill' }]
+  ), p => p.id
+);
 
-keyed.changes().subscribe(console.log);        // --> Log changes
+k.changes().subscribe(console.log);        // --> Log changes
 
-state.value = [
+k.value = [
   { id: 102, name: 'Jill' },
   { id: 101, name: 'Jack' },
   { id: 103, name: 'Jafet' }
@@ -362,8 +365,10 @@ You can verify changes occuring on the state-tree (or on a particular sub-tree).
 the change history to revert unverified changes on affected sub-states:
 
 ```ts
-const s = new State([{ val: 21 }, { val: 22 }, { val: 23 }]);
-const v = new VerifiedState(s, change => change.value.reduce((t, i) => t + i.val) % 2 === 0);
+const v = verified(
+  state([{ val: 21 }, { val: 22 }, { val: 23 }]),
+  change => change.value.reduce((t, i) => t + i.val) % 2 === 0
+);
 
 v.sub(0).sub('val').value = 22; // --> change denied, local changes automatically reverted
 v.sub(0).sub('val').value = 23; // --> change accepted and routed through the state-tree
@@ -376,7 +381,7 @@ v.sub(0).sub('val').value = 23; // --> change accepted and routed through the st
 
 ## Extensibility
 
-An **RxDeep** `State` is an [RxJS](https://rxjs.dev) [`Observable`](https://rxjs.dev/guide/observable) 
+An **RxDeep** state is an [RxJS](https://rxjs.dev) [`Observable`](https://rxjs.dev/guide/observable) 
 and an [`Observer`](https://rxjs.dev/guide/observer), providing great interoperability with lots of existing tools.
 
 Additionally, each state basically relies on a downstream observable and an upstream observer for keeping track of changes
@@ -390,7 +395,7 @@ in any particular use case (for example you can easily distribute state-trees ac
 
 ## Thin and Type Safe
 
-**RxDeep** has a bundle size of under `8Kb`, which includes its only dependency [RxJS](https://rxjs.dev) (tree-shaken).
+**RxDeep** has a bundle size of `~8Kb`, which includes its only dependency [RxJS](https://rxjs.dev) (tree-shaken).
 Since [RxJS](https://rxjs.dev) is already included in lots of frontend bundles, contribution of **RxDeep** to your
 bundle size will most probably be under `2Kb` (which is the raw library without dependencies).
 

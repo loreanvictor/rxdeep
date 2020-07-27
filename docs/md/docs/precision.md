@@ -1,20 +1,20 @@
 # Precision
 
-**RxDeep** is designed to be extremely precise, meaning `State` objects should emit only when they have a good reason to. To be more
-precise (pun unintended), absolute precision means a `State` emits values when and only when one of the following holds:
+**RxDeep** is designed to be extremely precise, meaning states should emit only when they have a good reason to. To be more
+precise (pun unintended), absolute precision means a state emits values when and only when one of the following holds:
 
 1. Its value has changed.
 
 1. Its value is directly updated (possibly to the same value).
 
-1. It points to the same address in state-tree as another `State` whose value is directly updated (possibly to the same value).
+1. It points to the same address in state-tree as another state whose value is directly updated (possibly to the same value).
 
 1. One of its descendent sub-states (a sub-state in its sub-tree) satisfies (2) or (3).
 
 <br>
 
 ```ts
-const root = new State([
+const root = state([
   { name: 'Jack', address: { city: 'Java', country: 'Indonesia' } },
   { name: 'Jafar', address: { city: 'Jiroft', country: 'Iran' } },
 ]);
@@ -54,8 +54,8 @@ what has changed.
 
 ## Redundancy
 
-_Redundancy_ refers to situations when a `State` emits without a good reason for doing so (i.e. none of the outline criteria hold up).
-**RxDeep** has no redundancy, meaning a `State` does not emit values without a good reason (without one of the aforementioned
+_Redundancy_ refers to situations when a state emits without a good reason for doing so (i.e. none of the outline criteria hold up).
+**RxDeep** has no redundancy, meaning a state does not emit values without a good reason (without one of the aforementioned
 criteria being true).
 
 This is due to the fact that leaf-changes are fully traced and delivered only to affected sub-states, and arbitrary
@@ -92,7 +92,7 @@ However, this also results in [k](:Formula) emissions by all affected states (e.
 emit [k](:Formula) times).
 
 ```ts
-const company = new State({
+const company = state({
   teams: [{
     people: [{name: 'Jack', age: 42}, {name: 'Jill', age: 31}],
     name: 'Awesome Team',
@@ -115,7 +115,7 @@ A more efficient solution would be to:
 1. Apply changes respecting maximal object immutability.
 
 ```ts
-const company = new State({
+const company = state({
   teams: [{
     people: [{name: 'Jack', age: 42}, {name: 'Jill', age: 31}],
     name: 'Awesome Team',

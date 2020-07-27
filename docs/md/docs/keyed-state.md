@@ -4,9 +4,9 @@ When you have an array of objects, it often happens that you are interested on a
 entity based on some identifier, regardless of its position within the array:
 
 ```ts
-import { State } from 'rxdeep';
+import { state } from 'rxdeep';
 
-const state = new State([
+const s = state([
   { id: 101, name: 'Jack', age: 32 },
   { id: 102, name: 'Jill', age: 67 },
   ...
@@ -16,20 +16,21 @@ const state = new State([
 <br>
 
 In this example, you might want a reactive state object that reflects state of _Jack_, independent
-of where _Jack_ sits in the array. The `KeyedState` class allows you to track entities of an array
+of where _Jack_ sits in the array. The `keyed()` method (or `KeyedState` class) allows you to track entities of an array
 using some key function which helps identify each entitiy:
 
 ```ts
-/*!*/import { State, KeyedState } from 'rxdeep';
+import { state, keyed } from 'rxdeep';
 
-const state = new State([
-  { id: 101, name: 'Jack', age: 32 },
-  { id: 102, name: 'Jill', age: 67 },
-  ...
-]);
+const k = keyed(state([
+    { id: 101, name: 'Jack', age: 32 },
+    { id: 102, name: 'Jill', age: 67 },
+    ...
+  ]),
+  person => person.id
+);
 
-/*!*/const keyed = new KeyedState(state, person => person.id);
-/*!*/keyed.key(101).subscribe(console.log);
+k.key(101).subscribe(console.log);
 ```
 
 <br>
@@ -39,11 +40,11 @@ by their `.id` property. `.key()` method behaves like `State.sub()` method, exce
 state of the entity matching given key instead of the entity on given index / property:
 
 ```ts
-state.value = [{ id: 103, name: 'James', age: 21 },  // --> no changes
-               ...state.value];                      // --> no changes
-keyed.value = [{ id: 103, name: 'James', age: 21},   // --> no changes
-               { id: 101, name: 'Jack', age: 32 }];  // --> no changes
-state.value = [{ id: 101, name: 'Jack', age: 33 }];  // --> change!!
+k.value = [{ id: 103, name: 'James', age: 21 },  // --> no changes
+           ...state.value];                      // --> no changes
+k.value = [{ id: 103, name: 'James', age: 21},   // --> no changes
+           { id: 101, name: 'Jack', age: 32 }];  // --> no changes
+k.value = [{ id: 101, name: 'Jack', age: 33 }];  // --> change!!
 
 // Logs only for the initial value and the last change:
 // > { id: 101, name: 'Jack', age: 32 }
@@ -56,17 +57,24 @@ The `.key()` method returns a typical [`State`](/docs/state), so you can similar
 use them to set values:
 
 ```ts
-keyed.key(101).sub('age').value = 34;
+k.key(101).sub('age').value = 34;
 
 // Logs:
 // > { id: 101, name: 'Jack', age: 34 }
 ```
 
-> [touch_app](:Icon) **NOTICE**
+> [touch_app](:Icon) **NOTE**
 >
 > Similar to a sub-state, it is highly recommended to keep a keyed substate (result of `.key()` method)
 > subscribed (having called its `.subscribe()` method) before issueing changes to it, to ensure that the
 > state is in sync with the change history.
+
+> [info](:Icon) **NOTE**
+>
+> Also you could use `KeyedState` constructor for creating keyed states:
+> ```ts
+> const k = new KeyedState(new State(...), ...);
+> ```
 
 ---
 
@@ -75,20 +83,22 @@ keyed.key(101).sub('age').value = 34;
 You can also track the index of a particular key within the array using `.index()` method:
 
 ```ts
-import { State, KeyedState } from '../src';
+import { keyed, state } from 'rxdeep';
 
-const state = new State([
-  { id: 101, name: 'Jack', age: 32 },
-  { id: 102, name: 'Jill', age: 67 },
-]);
-const keyed = new KeyedState(state, person => person.id);
-/*!*/keyed.index(101).subscribe(console.log);
+const k = keyed(state([
+    { id: 101, name: 'Jack', age: 32 },
+    { id: 102, name: 'Jill', age: 67 },
+  ]),
+  person => person.id
+);
 
-state.value = [{ id: 103, name: 'James', age: 21 },
-               ...state.value];
-keyed.value = [{ id: 103, name: 'James', age: 21},
-               { id: 101, name: 'Jack', age: 32 }];
-state.value = [{ id: 101, name: 'Jack', age: 33 }];
+/*!*/k.index(101).subscribe(console.log);
+
+k.value = [{ id: 103, name: 'James', age: 21 },
+            ...state.value];
+k.value = [{ id: 103, name: 'James', age: 21},
+           { id: 101, name: 'Jack', age: 32 }];
+k.value = [{ id: 101, name: 'Jack', age: 33 }];
 
 // Logs:
 // > 0
@@ -104,17 +114,19 @@ The `KeyedState` class also comes with `.changes()` method which provides a deta
 profile of the array in terms of additions, deletions and moved items:
 
 ```ts
-import { State, KeyedState } from '../src';
+import { state, keyed } from '../src';
 
-const state = new State([
-  { id: 101, name: 'Jack', age: 32 },
-  { id: 102, name: 'Jill', age: 67 },
-]);
-const keyed = new KeyedState(state, person => person.id);
-/*!*/keyed.changes().subscribe(console.log);
+const k = keyed(state([
+    { id: 101, name: 'Jack', age: 32 },
+    { id: 102, name: 'Jill', age: 67 },
+  ]),
+  person => person.id
+);
 
-state.value = [{ id: 103, name: 'James', age: 21 },
-               ...state.value];
+/*!*/k.changes().subscribe(console.log);
+
+k.value = [{ id: 103, name: 'James', age: 21 },
+           ...k.value];
 // Logs:
 // > {
 // >   additions: [{index: 0, item: {id: 103, name: 'James', age: 21}}],
@@ -125,8 +137,8 @@ state.value = [{ id: 103, name: 'James', age: 21 },
 // >   ]
 // > }
 
-keyed.value = [{ id: 103, name: 'James', age: 21},   // --> no changes
-               { id: 101, name: 'Jack', age: 32 }];  // --> no changes
+k.value = [{ id: 103, name: 'James', age: 21},   // --> no changes
+           { id: 101, name: 'Jack', age: 32 }];  // --> no changes
 // Logs:
 // > {
 // >   additions: [],
@@ -134,7 +146,7 @@ keyed.value = [{ id: 103, name: 'James', age: 21},   // --> no changes
 // >   moves: []
 // > }
 
-state.value = [{ id: 101, name: 'Jack', age: 33 }];  // --> change!!
+k.value = [{ id: 101, name: 'Jack', age: 33 }];  // --> change!!
 // Logs:
 // > {
 // >   additions: [],
@@ -142,7 +154,7 @@ state.value = [{ id: 101, name: 'Jack', age: 33 }];  // --> change!!
 // >   moves: [{oldIndex: 1, newIndex: 0, item: {id: 101, name: 'Jack', age: 32}}]
 // > }
 
-keyed.key(101).sub('age').value = 34;
+k.key(101).sub('age').value = 34;
 // Logs:
 // > {
 // >   additions: [],

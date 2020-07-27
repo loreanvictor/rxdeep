@@ -1,6 +1,6 @@
 {
   "name": "rxdeep",
-  "version": "0.1.11",
+  "version": "0.2.0",
   "description": "RxJS deep state management",
   "main": "dist/es5/index.js",
   "module": "dist/es6/index.js",

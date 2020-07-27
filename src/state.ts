@@ -95,3 +95,8 @@ export class State<T> extends Observable<T | undefined> implements Observer<T | 
     }
   }
 }
+
+
+export function state<T>(initial: T | undefined) {
+  return new State(initial);
+}

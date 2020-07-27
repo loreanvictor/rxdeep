@@ -36,15 +36,15 @@ Changing the value of a state, is equivalent of creating a change object with
 a leaf trace and sending it up the state's upstream. So this:
 
 ```ts
-state.value = x;
+s.value = x;
 ```
 
 is equivalent of this:
 
 ```ts
-state.upstream.next({
+s.upstream.next({
   value: x,
-  trace: { from: state.value, to: x }
+  trace: { from: s.value, to: x }
 });
 ```
 
@@ -71,16 +71,16 @@ Which means if `T` is an array, then the change trace's property `.subs` is a pa
 change traces of its elements, and when its an object, then the change trace's property `.subs` is a partial mapping
 of its properties to change trace of those properties:
 ```ts
-import { State } from '../src';
+import { state } from 'rxdeep';
 
-const state = new State({
+const s = state({
   x: { y: false },
   z: 3
 });
 
-state.sub('x').sub('y').subscribe(console.log);
+s.sub('x').sub('y').subscribe(console.log);
 
-state.upstream.next({
+s.upstream.next({
   value: { x: { y: true }, z: 3 },
 /*!*/  trace: {
 /*!*/    subs: {
@@ -142,7 +142,7 @@ by creating a change object and sending up a state's upstream instead of manuall
 changing sub-state values:
 
 ```ts
-state.upstream.next(change(state.value, _NewValue));
+s.upstream.next(change(s.value, _NewValue));
 ```
 
 <br>

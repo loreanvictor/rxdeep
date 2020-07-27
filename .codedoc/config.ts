@@ -24,11 +24,6 @@ export const config = /*#__PURE__*/configuration({
         name: 'Oxygen',
         url: 'https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400&display=swap',
         fallback: 'sans-serif'
-      },
-      code: {
-        name: 'DM Mono',
-        url: 'https://fonts.googleapis.com/css2?family=DM+Mono:wght@300&display=swap',
-        fallback: 'monospace'
       }
     },
     meta: {

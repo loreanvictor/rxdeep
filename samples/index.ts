@@ -1,34 +1,15 @@
-import { State, change } from '../src';
+import { state, verified, isLeaf } from '../src';
 
-const c = change(
-  {
-    x: { y: false },
-    z: 3
-  },
-  {
-    x: { y: true },
-    z: 3
-  }
-);
 
-console.log(c);
+const ascending = verified(state(3), 
+  change => !!change.value                         // --> not changing to `undefined
+  && isLeaf(change.trace)
+  && change?.trace?.from!! < change?.trace?.to!!           // --> we are changing to a larger value
+)
 
-// const state = new State({
-//   x: { y: false },
-//   z: 3
-// });
+ascending.subscribe(console.log);
 
-// state.sub('x').sub('y').subscribe(console.log);
-
-// state.upstream.next({
-//   value: { x: { y: true }, z: 3 },
-//   trace: {
-//     subs: {
-//       x: {
-//         subs: {
-//           y: { from: false, to: true }
-//         }
-//       }
-//     }
-//   }
-// });
+ascending.value = 2;             // --> rejected
+ascending.value = 4;             // --> accepted
+ascending.value = 7;             // --> accepted
+ascending.value = 5;             // --> rejected

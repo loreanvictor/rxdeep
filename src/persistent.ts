@@ -39,3 +39,8 @@ export class PersistentState<T> extends State<T> {
     );
   }
 }
+
+
+export function persistent<T>(state: State<T>, storage: Storage<T>) {
+  return new PersistentState(state, storage);
+}

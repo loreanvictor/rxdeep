@@ -133,3 +133,8 @@ export class KeyedState<T> extends Observable<T[] | undefined> implements Observ
     return this._changes.pipe(map(([_, listChanges]) => listChanges));
   }
 }
+
+
+export function keyed<T>(state: State<T[]>, keyfunc: KeyFunc<T>) {
+  return new KeyedState(state, keyfunc);
+}

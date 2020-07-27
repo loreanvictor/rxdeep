@@ -59,7 +59,7 @@ For changes in a single leaf node, the node itself should emit a change, its par
 should emit a change, and all the path from the node to the root state should emit changes:
 
 ```ts
-const root = [{address: { city: 'Jakarta' }}];
+const root = state([{address: { city: 'Jakarta' }}]);
 const mid1 = root.sub(0);
 const mid2 = mid1.sub('address');
 const leaf = mid2.sub('city');
@@ -115,7 +115,7 @@ and minimized on [\delta = d](:Formula) or [n_{\delta} = 1](:Formula), i.e. a le
 <br>
 
 ```ts
-const root = [{address: { city: 'Jakarta', country: 'Indonesia' }}];
+const root = state([{address: { city: 'Jakarta', country: 'Indonesia' }}]);
 const mid1 = root.sub(0);
 const mid2 = mid1.sub('address');
 const leaf1 = mid2.sub('city');

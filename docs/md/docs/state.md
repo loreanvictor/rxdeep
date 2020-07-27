@@ -1,13 +1,13 @@
 # State
 
-A `State` represents a value that can change, i.e. a _reactive_ value (as in "it reacts to stuff"):
+A state represents a value that can change, i.e. a _reactive_ value (as in "it reacts to stuff"):
 
 ```ts
-/*!*/import { State } from 'rxdeep';
+/*!*/import { state } from 'rxdeep';
 
-const a = new State(42);
-const b = new State([1, 2, 3, 4]);
-const c = new State({
+const a = state(42);
+const b = state([1, 2, 3, 4]);
+const c = state({
   name: 'Awesome Team',
   people: [
     { id: 101, name: 'Jeremy' },
@@ -17,13 +17,21 @@ const c = new State({
 })
 ```
 
+You can also create states using the `State` class constructor:
+
+```ts
+import { State } from 'rxdeep';
+
+const a = new State(42);
+```
+
 <br>
 
-A `State` is an [`Observable`](https://rxjs.dev/guide/observable), so you can subscribe to it and read
+A state is an [`Observable`](https://rxjs.dev/guide/observable), so you can subscribe to it and read
 its values as they change over time:
 
 ```ts
-const a = new State(42);
+const a = state(42);
 /*!*/a.subscribe(console.log); // --> log values from a
 
 a.value = 43;             // --> logs 43
@@ -39,7 +47,7 @@ a.value = 44;             // --> logs 44
 
 <br>
 
-You can change the value of a `State` using its `.value` property:
+You can change the value of a state using its `.value` property:
 
 ```ts
 a.value = 44;
@@ -53,10 +61,10 @@ a.next(44);
 
 <br>
 
-You can also read current value of a `State` using its `.value` property:
+You can also read current value of a state using its `.value` property:
 
 ```ts
-const a = new State(42);
+const a = state(42);
 /*!*/a.subscribe();           // --> this is important!
 
 /*!*/console.log(a.value);    // --> logs 42
@@ -70,13 +78,13 @@ a.value = 43;
 
 > [warning](:Icon) **WARNING**
 >
-> `.value` will not be up to date with `State`'s latest changes unless the `State` is _subscribed to_,
-> which means either `.subscribe()` method of the `State` should have been called or that of one of its sub-states
+> `.value` will not be up to date with state's latest changes unless the state is _subscribed to_,
+> which means either `.subscribe()` method of the state should have been called or that of one of its sub-states
 > (or proxy states).
 >
 > So this will NOT work:
 > ```ts
-> const a = new State(42);
+> const a = state(42);
 > a.value = 43;
 > console.log(a.value); // --> logs 42!!!
 >
@@ -86,7 +94,7 @@ a.value = 43;
 
 <br>
 
-A `State` is also an [`Observer`](https://rxjs.dev/guide/observer), which means it can subscribe to 
+A state is also an [`Observer`](https://rxjs.dev/guide/observer), which means it can subscribe to 
 another [`Observable`](https://rxjs.dev/guide/observable):
 
 ```ts
@@ -101,7 +109,7 @@ interval(1000).subscribe(a);
 ## Object Immutability
 
 **ALWAYS** make changes to the state that respect object immutability. You **MUST** always ensure that you are changing the 
-reference when changing the value of a `State`.
+reference when changing the value of a state.
 
 This happens automatically with raw values (`number`, `boolean`, `string`, etc.). For more complex values (objects and arrays),
 use the rest operator `...` or methods that create a new reference.
@@ -111,15 +119,15 @@ use the rest operator `...` or methods that create a new reference.
 <span style="color: #fa163f">**DON'T:**</span>
 
 ```ts
-state.value.push(x);
+/*~*/s.value.push(x)/*~*/;
 ```
 
 <span style="color: #27aa80">**DO:**</span>
 
 ```ts
-state.value = state.value.concat(x);
+s.value = s.value.concat(x);
 // -- OR --
-state.next(state.value.concat(x));
+s.next(s.value.concat(x));
 ```
 
 <br>
@@ -127,29 +135,29 @@ state.next(state.value.concat(x));
 <span style="color: #fa163f">**DON'T:**</span>
 
 ```ts
-state.value.x = 42;
+/*~*/s.value.x = 42/*~*/;
 ```
 
 <span style="color: #27aa80">**DO:**</span>
 
 ```ts
-state.value = { ...state.value, x: 42 }
+s.value = { ...s.value, x: 42 }
 // -- OR --
-state.sub('x').value = 42;
+s.sub('x').value = 42;
 // -- OR --
-state.next({ ...state.value, x : 42 });
+s.next({ ...s.value, x : 42 });
 // -- OR --
-state.sub('x').next(42);
+s.sub('x').next(42);
 ```
 
 ---
 
 ## Sub-States
 
-Take this `State`:
+Take this state:
 
 ```ts
-const team = new State({
+const team = state({
   name: 'Awesome Team',
   people: [
     { id: 101, name: 'Julia' },
@@ -182,14 +190,14 @@ In this example, `team` is the _parent state_ of all (also called the _root stat
 `nameLength` is also a sub-state of `name`, you could call it a _grandchild_ of `team`.
 
 You can use `sub` method with any possible key (index, string key, symbol, etc) of the objects of the parent state. The
-result is another `State` object, reflecting the state of that particular property.
+result is another state object, reflecting the state of that particular property.
 
 <br>
 
 Sub-states pick up changes made to their parent states:
 
 ```ts
-const team = new State({
+const team = state({
   name: 'Awesome Team',
   people: [
     { id: 101, name: 'Julia' },
@@ -247,7 +255,7 @@ team.sub('people').sub(0).sub('name').value = 'Julia';
 You can make changes in sub-states while listening to them on parent states:
 
 ```ts
-const team = new State({
+const team = state({
   name: 'Awesome Team',
   people: [
     { id: 101, name: 'Julia' },
@@ -292,7 +300,7 @@ on changed objects.
 
 ## Change History
 
-You can subscribe to `.downstream` property of a `State` to listen for changes occuring to it
+You can subscribe to `.downstream` property of a state to listen for changes occuring to it
 (instead of just updated values):
 
 ```ts
@@ -324,24 +332,24 @@ team.sub('people').sub(0).sub('name').value = 'Jackie';
 
 ## Under the Hood
 
-A `State` is constructed with an initial value, a _downstream_ (`Observable<Change>`), and an _upstream_ (`Observer<Change>`).
+A state is constructed with an initial value, a _downstream_ (`Observable<Change>`), and an _upstream_ (`Observer<Change>`).
 **Downstream** is basically where changes to this state come from.
 **Upstream** is where this state should report its changes.
 
 ```ts
-// In this example, the value of `state` is updated with a debounce, so
+// In this example, the value of `s` is updated with a debounce, so
 // changes made in rapid succession are supressed.
 
 const echo = new Subject<Change<number>>();
-/*!*/const state = new State(3, echo.pipe(debounceTime(300)), echo);
+/*!*/const s = new State(3, echo.pipe(debounceTime(300)), echo);
 
-state.subscribe(console.log);
+s.subscribe(console.log);
 
-state.value = 4;                           // --> gets supressed
-state.value = 10;                          // --> gets through
-setTimeout(() => state.value = 15, 310);   // --> gets through
-setTimeout(() => state.value = 17, 615);   // --> gets supressed
-setTimeout(() => state.value = 32, 710);   // --> gets through
+s.value = 4;                           // --> gets supressed
+s.value = 10;                          // --> gets through
+setTimeout(() => s.value = 15, 310);   // --> gets through
+setTimeout(() => s.value = 17, 615);   // --> gets supressed
+setTimeout(() => s.value = 32, 710);   // --> gets through
 
 // Logs:
 // > 3
@@ -350,10 +358,10 @@ setTimeout(() => state.value = 32, 710);   // --> gets through
 // > 32
 ```
 ```ts
-// In this example, the value of `state` will remained capped at 10.
+// In this example, the value of `s` will remained capped at 10.
 
 const echo = new Subject<Change<number>>();
-/*!*/const state = new State(3,
+/*!*/const s = new State(3,
 /*!*/  echo.pipe(map(change => ({
 /*!*/    ...change,
 /*!*/    value: Math.min(change.value!!, 10),
@@ -361,13 +369,13 @@ const echo = new Subject<Change<number>>();
 /*!*/  echo
 /*!*/);
 
-state.subscribe(console.log);
+s.subscribe(console.log);
 
-state.value = 4;    // --> ok
-state.value = 12;   // --> changes to 10
-state.value = 9;    // --> ok
-state.value++;      // --> ok
-state.value++;      // --> caps
+s.value = 4;    // --> ok
+s.value = 12;   // --> changes to 10
+s.value = 9;    // --> ok
+s.value++;      // --> ok
+s.value++;      // --> caps
 
 // Logs:
 // > 3
@@ -381,8 +389,8 @@ state.value++;      // --> caps
 
 <br>
 
-When a new value is set on a `State`, it creates a [`Change`](/docs/change) object and passes it up the
-upstream. The `State` **WILL NOT** immedialtely emit said value. Instead, it trusts that if the value
+When a new value is set on a state, it creates a [`Change`](/docs/change) object and passes it up the
+upstream. The state **WILL NOT** immedialtely emit said value. Instead, it trusts that if the value
 corresponding to a particular change should be emitted, it will eventually come down the downstream.
 Thats how we are able to modify the value of requested changes in above examples.
 
@@ -392,26 +400,31 @@ change trace, and send it through its own upstream. When a change comes down its
 it will match it with sub-states using the sub-key specified in the change trace and down-propagate
 it accordingly, removing the head of the change trace in the process.
 
-> [**touch_app**](:Icon) **IMPORTANT**
+> [touch_app](:Icon) **IMPORTANT**
 >
-> For performance reasons, a `State` will change its local `.value` when it is sending changes
+> For performance reasons, a state will change its local `.value` when it is sending changes
 > up the upstream, but will not emit them. This means if you want to completely reverse the effect
 > of some particular change, you should emit a reverse change object on the downstream in response.
-> Simply ignoring a change will cause the `State`'s value to go out of sync with the change history
+> Simply ignoring a change will cause the state's value to go out of sync with the change history
 > and the emission history.
 >
 > > :Buttons
 > > > :Button label=Learn More, url=/docs/change#reverting-changes
+
+> [info](:Icon) **NOTE**
+>
+> Note that if you want to create a state by providing specific upstream and downstream parameters,
+> you need to use `State` class constructor.
 
 <br>
 
 ### Post-Tracing
 
 When a change is issued to a non-leaf node, the change trace that is collected is up to that particular point of the
-state-tree, and not further down. As a result, a `State` does not know how to down propagate this change to its
+state-tree, and not further down. As a result, a state does not know how to down propagate this change to its
 sub-states.
 
-In such a case, the `State` will actually retrace the change based on given values, adding a complete trace to the
+In such a case, the state will actually retrace the change based on given values, adding a complete trace to the
 change object, and then routing it accordingly. This operation only happens at the depth that the change was made,
 since further down the trace is complete down to leaf-states. Additionally, due to efficient object-tree diffing,
 this single operation does not slow down the propagation of change by any means. Checkout the [post on performance](/docs/performance)

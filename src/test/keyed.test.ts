@@ -2,8 +2,8 @@ import { should, expect } from 'chai'; should();
 
 import { Subject } from 'rxjs';
 
-import { KeyedState } from '../keyed';
-import { State } from '../state';
+import { KeyedState, keyed } from '../keyed';
+import { State, state } from '../state';
 import { Change, ListChanges } from '../types';
 
 
@@ -365,5 +365,18 @@ describe('KeyedState', () => {
         }
       ]);
     });
+  });
+});
+
+
+describe('keyed', () => {
+  it('should create a `KeyedState` with given state and key function.', () => {
+    const s = state([1, 2, 3]);
+    const kf = (n: number) => n;
+    const k = keyed(s, kf);
+
+    k.state.should.equal(s);
+    k.keyfunc.should.equal(kf);
+    k.should.be.instanceOf(KeyedState);
   });
 });

@@ -41,3 +41,8 @@ export class VerifiedState<T> extends State<T> {
     );
   }
 }
+
+
+export function verified<T>(state: State<T>, verifier: (change: Change<T>) => boolean) {
+  return new VerifiedState(state, verifier);
+}

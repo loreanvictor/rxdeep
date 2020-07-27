@@ -2,9 +2,10 @@ import { should, expect } from 'chai'; should();
 import { Subject, of, never } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { PersistentState } from '../persistent';
-import { State } from '../state';
+import { PersistentState, persistent } from '../persistent';
+import { State, state } from '../state';
 import { Change } from '../types/changes';
+import { Storage } from '../types';
 
 
 describe('PersistentState', () => {
@@ -180,5 +181,21 @@ describe('PersistentState', () => {
     c.next(46);
 
     r.should.eql([43, 45]);
+  });
+});
+
+
+describe('persistent()', () => {
+  it('should create a `PersistentState` with given original state and storage.', () => {
+    const s = state(42);
+    const st: Storage<number> = {
+      load() { return of(undefined) },
+      save() {}
+    };
+    const p = persistent(s, st);
+
+    p.state.should.equal(s);
+    p.storage.should.equal(st);
+    p.should.be.instanceOf(PersistentState);
   });
 });

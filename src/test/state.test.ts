@@ -3,7 +3,7 @@ import { cloneDeep } from 'lodash';
 
 import { Subject } from 'rxjs';
 
-import { State } from '../state';
+import { State, state } from '../state';
 import { Change } from '../types';
 import { ignore } from '../ignore';
 
@@ -370,5 +370,14 @@ describe('State', () => {
       const s = new State([{x: 1}, {x: 2}]);
       s.sub(2).sub('x').value = 3;
     });
+  });
+});
+
+
+describe('state()', () => {
+  it('should create a `State` with given initial value.', () => {
+    const s = state(42);
+    s.value.should.equal(42);
+    s.should.be.instanceOf(State);
   });
 });
